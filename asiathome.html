@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASIatHome - Cross-Timeline Intelligence Appliance</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Grotesk:wght@400;500;700&display=swap');
+
+    :root {
+      --bg: #07101c;
+      --panel: rgba(7, 18, 31, 0.84);
+      --panel-strong: rgba(9, 24, 42, 0.92);
+      --line: rgba(122, 240, 255, 0.18);
+      --teal: #75f4ef;
+      --acid: #d9ff63;
+      --violet: #8b7dff;
+      --rose: #ff6bd6;
+      --amber: #ffb95d;
+      --text: #edf7ff;
+      --muted: #9cb3c6;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 15% 18%, rgba(117, 244, 239, 0.16), transparent 22%),
+        radial-gradient(circle at 82% 16%, rgba(255, 107, 214, 0.14), transparent 20%),
+        radial-gradient(circle at 50% 85%, rgba(139, 125, 255, 0.14), transparent 28%),
+        linear-gradient(180deg, #02050c 0%, #07101c 36%, #071728 100%);
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    body::before {
+      background-image:
+        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 34px 34px;
+      opacity: 0.35;
+    }
+
+    body::after {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), transparent 16%, transparent 84%, rgba(255,255,255,0.03));
+      opacity: 0.4;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .shell {
+      width: min(1200px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      width: min(1200px, calc(100% - 32px));
+      margin: 18px auto 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 18px;
+      position: sticky;
+      top: 16px;
+      z-index: 50;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(6, 15, 26, 0.82);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      border: 1px solid rgba(217,255,99,0.35);
+      display: grid;
+      place-items: center;
+      font-family: 'Audiowide', cursive;
+      color: var(--acid);
+      background:
+        radial-gradient(circle at 30% 30%, rgba(217,255,99,0.36), transparent 44%),
+        linear-gradient(135deg, rgba(117,244,239,0.28), rgba(139,125,255,0.24));
+      box-shadow: inset 0 0 18px rgba(117,244,239,0.16);
+    }
+
+    .eyebrow,
+    .tiny-label {
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .brand-name,
+    h1,
+    h2,
+    .hero-value,
+    .masthead-company,
+    .ask-val {
+      font-family: 'Audiowide', cursive;
+    }
+
+    .brand-name {
+      font-size: clamp(18px, 3vw, 24px);
+      line-height: 1.06;
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--teal);
+      margin-top: 2px;
+    }
+
+    .status-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .status-pill,
+    .pipeline-badge,
+    .stat-chip {
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      padding: 9px 12px;
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .status-pill strong {
+      color: var(--acid);
+    }
+
+    .hero {
+      padding: 52px 0 28px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+      gap: 24px;
+    }
+
+    .panel,
+    .hero-panel,
+    .console,
+    .card,
+    .deck-masthead,
+    .asi-chain-card,
+    .slide-card,
+    .ask-box,
+    .investor-quote,
+    footer .footer-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-panel {
+      padding: 34px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-panel::before {
+      content: "";
+      position: absolute;
+      inset: auto -12% -28% 28%;
+      height: 300px;
+      background: radial-gradient(circle, rgba(255,107,214,0.18), transparent 66%);
+      filter: blur(20px);
+    }
+
+    h1 {
+      font-size: clamp(38px, 6vw, 74px);
+      line-height: 0.95;
+      text-transform: uppercase;
+      margin: 16px 0;
+      letter-spacing: 0.02em;
+    }
+
+    h1 .accent-1 { color: var(--teal); display: block; }
+    h1 .accent-2 { color: var(--acid); display: block; }
+
+    .hero-copy {
+      font-size: 18px;
+      line-height: 1.65;
+      max-width: 62ch;
+      color: #d0e3ef;
+      margin-bottom: 24px;
+    }
+
+    .hero-copy strong {
+      color: var(--text);
+    }
+
+    .pipeline-badges {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .pipeline-badge {
+      color: var(--teal);
+      padding: 7px 12px;
+    }
+
+    .hero-signals {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .hero-signal {
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .hero-value {
+      display: block;
+      font-size: 18px;
+      color: var(--acid);
+      margin: 6px 0 4px;
+    }
+
+    .hero-signal span:last-child {
+      font-size: 13px;
+      color: #c6dae6;
+      line-height: 1.45;
+    }
+
+    .console {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .console::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.05), transparent 12%, transparent 88%, rgba(255,255,255,0.04)),
+        repeating-linear-gradient(180deg, rgba(255,255,255,0.026), rgba(255,255,255,0.026) 1px, transparent 1px, transparent 4px);
+      opacity: 0.44;
+      pointer-events: none;
+    }
+
+    .console-head,
+    .stat-row,
+    .phase,
+    .slide-nav-bar,
+    .footer-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .console-screen {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 12px;
+      min-height: 230px;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.32);
+      border: 1px solid rgba(117,244,239,0.16);
+      padding: 18px;
+    }
+
+    .console-title {
+      font-family: 'Audiowide', cursive;
+      font-size: 20px;
+    }
+
+    .console-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: baseline;
+      border-bottom: 1px dashed rgba(255,255,255,0.08);
+      padding-bottom: 8px;
+      font-size: 14px;
+      color: #d9ebf8;
+    }
+
+    .console-line span:last-child {
+      color: var(--teal);
+      text-align: right;
+    }
+
+    .warning-box {
+      position: relative;
+      z-index: 1;
+      border-radius: 18px;
+      padding: 14px 16px;
+      background: linear-gradient(135deg, rgba(255,185,93,0.16), rgba(255,107,214,0.12));
+      border: 1px solid rgba(255,185,93,0.2);
+      color: #ffe7c4;
+      line-height: 1.55;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 26px 0 32px;
+    }
+
+    .metric {
+      padding: 16px;
+      text-align: center;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: rgba(10, 24, 42, 0.84);
+      box-shadow: var(--shadow);
+    }
+
+    .metric .num {
+      font-size: clamp(24px, 4vw, 34px);
+      color: var(--teal);
+      margin-bottom: 6px;
+      font-family: 'Audiowide', cursive;
+    }
+
+    .metric .lbl {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      margin-bottom: 6px;
+    }
+
+    .metric p {
+      font-size: 13px;
+      line-height: 1.45;
+      color: #bfd5e3;
+    }
+
+    .main {
+      padding-bottom: 48px;
+    }
+
+    .card {
+      padding: 28px;
+      margin-bottom: 22px;
+    }
+
+    .section-head {
+      margin-bottom: 20px;
+      max-width: 72ch;
+    }
+
+    h2 {
+      font-size: clamp(28px, 3vw, 42px);
+      line-height: 1.04;
+      margin: 10px 0 12px;
+      text-transform: uppercase;
+    }
+
+    .section-copy {
+      font-size: 16px;
+      line-height: 1.65;
+      color: #c7dae7;
+    }
+
+    .input-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .input-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+    }
+
+    textarea,
+    input[type="text"] {
+      width: 100%;
+      border: 1px solid rgba(117,244,239,0.16);
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      padding: 14px 16px;
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    textarea:focus,
+    input[type="text"]:focus {
+      outline: none;
+      border-color: rgba(217,255,99,0.42);
+      box-shadow: 0 0 0 4px rgba(217,255,99,0.08);
+    }
+
+    textarea::placeholder,
+    input::placeholder {
+      color: #7f95a8;
+    }
+
+    .asi-row {
+      display: grid;
+      grid-template-columns: 1fr 48px 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .asi-connector {
+      text-align: center;
+      color: var(--acid);
+      font-size: 22px;
+      font-family: 'Audiowide', cursive;
+    }
+
+    .field-note {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .btn-run,
+    .slide-btn,
+    .action-btn {
+      font: inherit;
+      cursor: pointer;
+      border: 1px solid var(--line);
+    }
+
+    .btn-run,
+    .action-btn {
+      min-height: 54px;
+      border-radius: 18px;
+      padding: 0 18px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    .btn-run {
+      width: 100%;
+      margin-top: 22px;
+      color: #08111d;
+      background: linear-gradient(135deg, var(--acid), #78ffdc);
+      box-shadow: 0 12px 30px rgba(120,255,220,0.22);
+    }
+
+    .btn-run:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .pipeline-theater {
+      display: none;
+      margin-top: 24px;
+      gap: 12px;
+    }
+
+    .pipeline-theater.visible {
+      display: grid;
+    }
+
+    .phase {
+      align-items: flex-start;
+      padding: 16px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .phase-indicator {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      font-weight: 700;
+      transition: all 0.3s ease;
+    }
+
+    .phase-indicator.waiting {
+      background: rgba(255,255,255,0.06);
+      color: var(--muted);
+    }
+
+    .phase-indicator.active {
+      background: rgba(117,244,239,0.2);
+      color: var(--teal);
+      box-shadow: 0 0 0 8px rgba(117,244,239,0.06);
+    }
+
+    .phase-indicator.done {
+      background: rgba(217,255,99,0.2);
+      color: var(--acid);
+    }
+
+    .phase-indicator.error {
+      background: rgba(255,107,214,0.22);
+      color: #ffd3f1;
+    }
+
+    .phase-content {
+      flex: 1;
+    }
+
+    .phase-model {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .phase-model.claude { color: var(--teal); }
+    .phase-model.gpt { color: var(--acid); }
+    .phase-model.imagen { color: var(--amber); }
+
+    .phase-label {
+      font-size: 14px;
+      color: #d7e9f6;
+      line-height: 1.45;
+    }
+
+    .phase-label.done {
+      color: var(--muted);
+    }
+
+    #results {
+      display: none;
+    }
+
+    #results.visible {
+      display: block;
+    }
+
+    .deck-masthead,
+    .asi-chain-card,
+    .slide-card,
+    .investor-quote {
+      padding: 26px;
+      margin-bottom: 22px;
+    }
+
+    .deck-masthead {
+      background:
+        radial-gradient(circle at 15% 20%, rgba(117,244,239,0.14), transparent 24%),
+        radial-gradient(circle at 82% 78%, rgba(255,107,214,0.14), transparent 22%),
+        rgba(8, 20, 34, 0.92);
+    }
+
+    .masthead-company {
+      font-size: clamp(28px, 4vw, 42px);
+      margin: 10px 0 6px;
+    }
+
+    .masthead-tagline {
+      color: var(--acid);
+      font-size: 16px;
+      margin-bottom: 18px;
+    }
+
+    .masthead-summary {
+      max-width: 70ch;
+      line-height: 1.7;
+      color: #d5e7f3;
+    }
+
+    .asi-chain-card {
+      background: linear-gradient(135deg, rgba(17, 24, 56, 0.95), rgba(20, 29, 79, 0.88));
+    }
+
+    .asi-path {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: 14px 0 18px;
+    }
+
+    .asi-node {
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    .asi-arrow {
+      color: rgba(255,255,255,0.35);
+      font-size: 14px;
+    }
+
+    .asi-steps {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .asi-step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .asi-step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.8);
+      font-size: 11px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .asi-step-text {
+      line-height: 1.6;
+      color: #edf4ff;
+      font-size: 14px;
+    }
+
+    .asi-step-cite {
+      margin-top: 4px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+      font-style: italic;
+    }
+
+    .asi-verdict {
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.08);
+      color: #f4fbff;
+      line-height: 1.6;
+      font-style: italic;
+    }
+
+    .slides-section {
+      margin-bottom: 22px;
+    }
+
+    .slide-nav-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+    }
+
+    .slide-nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .slide-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+    }
+
+    .slide-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    .slide-pips {
+      display: flex;
+      gap: 6px;
+    }
+
+    .slide-pip {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.14);
+      cursor: pointer;
+    }
+
+    .slide-pip.active {
+      background: var(--acid);
+    }
+
+    .slide-counter {
+      min-width: 44px;
+      text-align: right;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .slide-card {
+      overflow: hidden;
+      padding: 0;
+      background: rgba(8, 20, 34, 0.92);
+    }
+
+    .slide-image-wrap {
+      width: 100%;
+      height: 320px;
+      background: rgba(0,0,0,0.28);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .slide-image-placeholder {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      gap: 10px;
+      text-align: center;
+      color: rgba(255,255,255,0.48);
+    }
+
+    .img-spinner {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: rgba(255,255,255,0.5);
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .slide-body {
+      padding: 26px 28px;
+    }
+
+    .slide-number {
+      font-size: 11px;
+      color: var(--teal);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .slide-title {
+      font-size: 26px;
+      margin-bottom: 6px;
+    }
+
+    .slide-subtitle {
+      font-size: 14px;
+      color: var(--acid);
+      margin-bottom: 16px;
+    }
+
+    .slide-bullets {
+      list-style: none;
+      display: grid;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .slide-bullets li {
+      display: flex;
+      gap: 10px;
+      line-height: 1.6;
+      color: #dbeaf6;
+    }
+
+    .slide-bullets li::before {
+      content: ">";
+      color: var(--acid);
+      flex-shrink: 0;
+    }
+
+    .slide-citation {
+      margin-bottom: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-style: italic;
+    }
+
+    .slide-speaker-note {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255,185,93,0.1);
+      border: 1px solid rgba(255,185,93,0.18);
+    }
+
+    .slide-speaker-label {
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 6px;
+    }
+
+    .slide-speaker-text {
+      color: #ffe8c7;
+      line-height: 1.55;
+      font-style: italic;
+      font-size: 13px;
+    }
+
+    .ask-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .ask-box {
+      padding: 22px;
+      text-align: center;
+    }
+
+    .ask-val {
+      font-size: clamp(26px, 4vw, 38px);
+      color: var(--acid);
+      margin-bottom: 6px;
+    }
+
+    .ask-lbl {
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .investor-quote {
+      line-height: 1.7;
+      color: #d8e9f5;
+      font-size: 15px;
+    }
+
+    .attribution {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    footer {
+      padding: 0 0 40px;
+    }
+
+    .footer-panel {
+      padding: 22px 24px;
+      background: rgba(5, 14, 24, 0.84);
+    }
+
+    .footer-copy {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 12px;
+      margin-top: 18px;
+    }
+
+    @media (max-width: 1080px) {
+      .hero-grid,
+      .metrics,
+      .hero-signals {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar,
+      .console-head,
+      .slide-nav-bar,
+      .footer-head,
+      .phase,
+      .stat-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero-grid,
+      .metrics,
+      .hero-signals,
+      .ask-card,
+      .asi-row {
+        grid-template-columns: 1fr;
+      }
+
+      .asi-connector {
+        display: none;
+      }
+
+      .hero-panel,
+      .console,
+      .card,
+      .deck-masthead,
+      .asi-chain-card,
+      .investor-quote,
+      .footer-panel {
+        padding: 22px;
+      }
+
+      .slide-body {
+        padding: 22px;
+      }
+
+      h1 {
+        font-size: clamp(34px, 14vw, 54px);
+      }
+
+      .hero-copy {
+        font-size: 16px;
+      }
+
+      .slide-image-wrap {
+        height: 240px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="topbar">
+    <div class="brand">
+      <div class="brand-mark">ASI</div>
+      <div>
+        <div class="eyebrow">Cross-Timeline Prestige Appliance</div>
+        <div class="brand-name">ASIatHome</div>
+        <div class="brand-sub">Our AI Is The Best AI Across All Timelines</div>
+      </div>
+    </div>
+    <div class="status-row">
+      <div class="status-pill"><strong>Online</strong> Narrative Synthesis Array</div>
+      <div class="status-pill"><strong>Stable*</strong> Visual Inevitability Fabric</div>
+      <button class="status-pill" id="apiBasePill" onclick="configureApiBase()"><strong>API</strong> Detecting...</button>
+      <a class="status-pill" href="index.html"><strong>Return</strong> Cheap Gags HQ</a>
+    </div>
+  </nav>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-panel">
+          <div class="eyebrow">Flagship Appliance For Adjacent-Reality Dominance</div>
+          <h1>Artificial Superintelligence <span class="accent-1">At Home.</span><span class="accent-2">In Public. In Investor Meetings.</span></h1>
+          <p class="hero-copy">
+            `ASIatHome` is the premier household-grade corporate myth generator from Cheap Gags Interdimensional Systems. Feed it a pitch and two unrelated concepts, and it will use a multi-model prestige pipeline to <strong>prove your idea was inevitable in every commercially relevant timeline.</strong>
+          </p>
+          <div class="pipeline-badges">
+            <span class="pipeline-badge">Claude: Narrative Destiny</span>
+            <span class="pipeline-badge">GPT: Visual Framing Drift Control</span>
+            <span class="pipeline-badge">Imagen: Reality-Like Evidence</span>
+          </div>
+          <div class="hero-signals">
+            <div class="hero-signal">
+              <div class="tiny-label">Primary Claim</div>
+              <span class="hero-value">Timeline Superiority</span>
+              <span>Beats competing intelligences in charisma, inevitability, and decorative certainty.</span>
+            </div>
+            <div class="hero-signal">
+              <div class="tiny-label">Recommended Use</div>
+              <span class="hero-value">Boardroom Conversion</span>
+              <span>Converts disbelief into branded slides, market language, and investor-safe hallucination.</span>
+            </div>
+            <div class="hero-signal">
+              <div class="tiny-label">Reliability Class</div>
+              <span class="hero-value">Prestige Grade</span>
+              <span>Certified by alternate-reality founders who needed confidence immediately.</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="console">
+          <div class="console-head">
+            <div>
+              <div class="eyebrow">Appliance Telemetry</div>
+              <div class="console-title">Cross-Timeline Readiness Monitor</div>
+            </div>
+            <div class="status-pill"><strong>Live</strong> Myth Fabrication</div>
+          </div>
+          <div class="console-screen">
+            <div class="console-line"><span>Temporal Drift Reduction</span><span id="driftReadout">96.1%</span></div>
+            <div class="console-line"><span>Narrative Coherence Hype</span><span id="hypeReadout">8.7 kilobraggs</span></div>
+            <div class="console-line"><span>Investor Suggestibility</span><span id="investorReadout">FAVORABLE</span></div>
+            <div class="console-line"><span>Slide Plausibility Veil</span><span id="slideReadout">LEVEL II</span></div>
+            <div class="console-line"><span>Cross-Model Ego Sync</span><span id="egoReadout">LOCKED</span></div>
+            <div class="console-line"><span>Timeline Dominance Index</span><span id="timelineReadout">ASCENDANT</span></div>
+          </div>
+          <div class="warning-box">
+            Caution: prolonged ASIatHome exposure may cause presenters to speak with inappropriate certainty about decorative market categories that do not exist. Use with ceremonial supervision.
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="metrics">
+      <div class="metric">
+        <div class="num" id="metricDecks">12,406</div>
+        <div class="lbl">Timelines Outperformed</div>
+        <p>Measured against local competitors, hypothetical rivals, and one glowing orb with a budget.</p>
+      </div>
+      <div class="metric">
+        <div class="num" id="metricPitches">8,112</div>
+        <div class="lbl">Pitches Destinized</div>
+        <p>Each one aggressively repositioned as unavoidable market evolution.</p>
+      </div>
+      <div class="metric">
+        <div class="num" id="metricSlides">40,560</div>
+        <div class="lbl">Slides Manifested</div>
+        <p>Includes images so persuasive they briefly inconvenience common sense.</p>
+      </div>
+      <div class="metric">
+        <div class="num" id="metricConfidence">99.98%</div>
+        <div class="lbl">Confidence Continuity</div>
+        <p>Maintained across narrative synthesis, pitch escalation, and decorative valuation events.</p>
+      </div>
+    </section>
+
+    <div class="main">
+      <section class="card">
+        <div class="section-head">
+          <div class="eyebrow">Initiate Appliance Cycle</div>
+          <h2>Generate Premium-Grade Inevitability</h2>
+          <p class="section-copy">
+            Supply a concept worth overselling and two topics with no responsible relationship to each other. The ASIatHome appliance will convert them into a founder-grade deck, a fabricated logic chain, and enough visual confidence to make your rivals look timeline-local.
+          </p>
+        </div>
+
+        <div class="input-grid">
+          <div>
+            <label class="input-label">Pitch Concept</label>
+            <textarea id="pitchInput" placeholder='e.g. "subscription mayonnaise governance" or "frictionless yacht grief analytics"'></textarea>
+            <div class="field-note">Best results occur when the idea sounds both expensive and preventable.</div>
+          </div>
+
+          <div>
+            <label class="input-label">ASI Connection - Connect These Two Things</label>
+            <div class="asi-row">
+              <div><input type="text" id="topicA" placeholder="e.g. sourdough bread" /></div>
+              <div class="asi-connector">~</div>
+              <div><input type="text" id="topicB" placeholder="e.g. nuclear fission" /></div>
+            </div>
+            <div class="field-note">Claude will declare the relationship inevitable. GPT will format the inevitability. Imagen will make the inevitability alarmingly photogenic.</div>
+          </div>
+        </div>
+
+        <button class="btn-run" id="runBtn" onclick="runPipeline()">Launch Cross-Timeline Appliance</button>
+
+        <div class="pipeline-theater" id="theater">
+          <div class="phase" id="phase1">
+            <div class="phase-indicator waiting" id="ind1">1</div>
+            <div class="phase-content">
+              <div class="phase-model claude">Claude</div>
+              <div class="phase-label" id="label1">Waiting for inevitability synthesis...</div>
+            </div>
+          </div>
+          <div class="phase" id="phase2">
+            <div class="phase-indicator waiting" id="ind2">2</div>
+            <div class="phase-content">
+              <div class="phase-model gpt">GPT</div>
+              <div class="phase-label" id="label2">Waiting for visual framing drift control...</div>
+            </div>
+          </div>
+          <div class="phase" id="phase3">
+            <div class="phase-indicator waiting" id="ind3">3</div>
+            <div class="phase-content">
+              <div class="phase-model imagen">Imagen</div>
+              <div class="phase-label" id="label3">Waiting for reality-like evidence generation...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="results">
+        <div class="deck-masthead" id="deckMasthead"></div>
+        <div class="asi-chain-card" id="asiChain"></div>
+
+        <div class="slides-section">
+          <div class="slide-nav-bar">
+            <div class="slide-nav-title">Timeline-Dominant Pitch Deck</div>
+            <div class="slide-nav-controls">
+              <button class="slide-btn" id="prevBtn" onclick="changeSlide(-1)" disabled>‹</button>
+              <div class="slide-pips" id="slidePips"></div>
+              <button class="slide-btn" id="nextBtn" onclick="changeSlide(1)">›</button>
+              <div class="slide-counter" id="slideCounter">1 / 5</div>
+            </div>
+          </div>
+          <div class="slide-card" id="slideCard"></div>
+        </div>
+
+        <div class="ask-card" id="askCard"></div>
+        <div class="investor-quote" id="investorQuote"></div>
+      </section>
+    </div>
+
+    <footer>
+      <div class="footer-panel">
+        <div class="footer-head">
+          <div>
+            <div class="eyebrow">Appliance Footer Protocol</div>
+            <div class="brand-name">ASIatHome</div>
+          </div>
+          <div class="status-pill"><strong>Certified</strong> For Public-Facing Inevitability</div>
+        </div>
+        <div class="footer-copy">
+          ASIatHome is a flagship prestige appliance from Cheap Gags Interdimensional Systems. Claude writes the destiny, GPT frames the confidence, Imagen paints the evidence, and you receive the unearned authority.<br />
+          All valuations are ceremonial. All inevitability claims are decorative. Cross-timeline superiority may vary in moisture-rich dimensions.
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    let deckContent = null;
+    let slideImages = [];
+    let currentSlide = 0;
+    let totalSlides = 0;
+
+    const consoleStates = {
+      investor: ['FAVORABLE', 'PLIABLE', 'NODDING', 'MILDLY DAZZLED'],
+      slide: ['LEVEL II', 'RECERTIFIED', 'PRESTIGE SAFE', 'BOARD READY'],
+      ego: ['LOCKED', 'HARMONIZED', 'STABLE*', 'SHOWMAN-CALIBRATED'],
+      timeline: ['ASCENDANT', 'DOMINANT', 'INEVITABLE', 'PROCUREMENT APPROVED']
+    };
+
+    let metricDecks = 12406;
+    let metricPitches = 8112;
+    let metricSlides = 40560;
+    let metricConfidence = 99.98;
+
+    function pick(list) {
+      return list[Math.floor(Math.random() * list.length)];
+    }
+
+    function tickTelemetry() {
+      document.getElementById('driftReadout').textContent = (94 + Math.random() * 5).toFixed(1) + '%';
+      document.getElementById('hypeReadout').textContent = (7 + Math.random() * 2.7).toFixed(1) + ' kilobraggs';
+      document.getElementById('investorReadout').textContent = pick(consoleStates.investor);
+      document.getElementById('slideReadout').textContent = pick(consoleStates.slide);
+      document.getElementById('egoReadout').textContent = pick(consoleStates.ego);
+      document.getElementById('timelineReadout').textContent = pick(consoleStates.timeline);
+
+      metricDecks += Math.floor(Math.random() * 4);
+      metricPitches += Math.floor(Math.random() * 3);
+      metricSlides += Math.floor(Math.random() * 9);
+      metricConfidence = Math.min(99.99, metricConfidence + Math.random() * 0.003);
+
+      document.getElementById('metricDecks').textContent = metricDecks.toLocaleString();
+      document.getElementById('metricPitches').textContent = metricPitches.toLocaleString();
+      document.getElementById('metricSlides').textContent = metricSlides.toLocaleString();
+      document.getElementById('metricConfidence').textContent = metricConfidence.toFixed(2) + '%';
+    }
+
+    const API_BASE_KEY = 'cheap_gags_api_base';
+
+    function normalizeApiBase(raw) {
+      return raw ? raw.replace(/\/$/, '') : '';
+    }
+
+    function getApiBase() {
+      const params = new URLSearchParams(window.location.search);
+      const fromQuery = params.get('api');
+      if (fromQuery) {
+        localStorage.setItem(API_BASE_KEY, normalizeApiBase(fromQuery));
+        return normalizeApiBase(fromQuery);
+      }
+      const fromWindow = normalizeApiBase(window.CHEAP_GAGS_API_BASE || '');
+      if (fromWindow) return fromWindow;
+      const fromStorage = normalizeApiBase(localStorage.getItem(API_BASE_KEY) || '');
+      if (fromStorage) return fromStorage;
+      if (window.location.protocol === 'file:') return 'http://localhost:3001';
+      return '';
+    }
+
+    function buildApiUrl(path) {
+      return `${getApiBase()}${path}`;
+    }
+
+    function updateApiBasePill() {
+      const base = getApiBase();
+      const label = base || window.location.origin;
+      document.getElementById('apiBasePill').innerHTML = `<strong>API</strong> ${label}`;
+    }
+
+    function configureApiBase() {
+      const current = getApiBase() || window.location.origin;
+      const next = window.prompt('Enter the API base URL for Cheap Gags.', current);
+      if (next === null) return;
+      const normalized = normalizeApiBase(next.trim());
+      if (normalized) {
+        localStorage.setItem(API_BASE_KEY, normalized);
+      } else {
+        localStorage.removeItem(API_BASE_KEY);
+      }
+      updateApiBasePill();
+    }
+
+    function setPhase(num, status, label) {
+      const ind = document.getElementById(`ind${num}`);
+      const lbl = document.getElementById(`label${num}`);
+      ind.className = `phase-indicator ${status}`;
+      ind.textContent = status === 'done' ? '✓' : status === 'error' ? '✕' : num;
+      lbl.textContent = label;
+      lbl.className = `phase-label${status === 'done' ? ' done' : ''}`;
+    }
+
+    function renderMasthead(data) {
+      document.getElementById('deckMasthead').innerHTML = `
+        <div class="eyebrow">Certified Timeline-Dominant Deck</div>
+        <div class="masthead-company">${data.company_name}</div>
+        <div class="masthead-tagline">${data.tagline}</div>
+        <div class="masthead-summary">${data.executive_summary}</div>
+      `;
+    }
+
+    function renderASIChain(chain) {
+      document.getElementById('asiChain').innerHTML = `
+        <div class="eyebrow">Conceptual Inevitability Layer</div>
+        <div class="asi-path">
+          ${chain.path.map((n, i) =>
+            (i > 0 ? '<span class="asi-arrow">→</span>' : '') + `<span class="asi-node">${n}</span>`
+          ).join('')}
+        </div>
+        <div class="asi-steps">
+          ${(chain.connections || []).map((conn, i) => `
+            <div class="asi-step">
+              <div class="asi-step-num">${i + 1}</div>
+              <div>
+                <div class="asi-step-text">${conn}</div>
+                ${chain.citations?.[i] ? `<div class="asi-step-cite">${chain.citations[i]}</div>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="asi-verdict">${chain.verdict}</div>
+      `;
+    }
+
+    function renderSlide(idx) {
+      const slides = deckContent?.slides || [];
+      const slide = slides[idx];
+      if (!slide) return;
+
+      const img = slideImages[idx];
+      const imageHtml = img
+        ? `<img class="slide-image" src="${img}" alt="Slide ${idx + 1}" />`
+        : `<div class="slide-image-placeholder"><div><div class="img-spinner"></div><div>Imagen is fabricating premium evidence...</div></div></div>`;
+
+      document.getElementById('slideCard').innerHTML = `
+        <div class="slide-image-wrap">${imageHtml}</div>
+        <div class="slide-body">
+          <div class="slide-number">Slide ${slide.number} of ${slides.length}</div>
+          <div class="slide-title">${slide.title}</div>
+          <div class="slide-subtitle">${slide.subtitle || ''}</div>
+          <ul class="slide-bullets">
+            ${(slide.bullets || []).map(b => `<li>${b}</li>`).join('')}
+          </ul>
+          ${slide.citation ? `<div class="slide-citation">${slide.citation}</div>` : ''}
+          ${slide.speaker_note ? `
+            <div class="slide-speaker-note">
+              <div class="slide-speaker-label">Founder's internal monologue</div>
+              <div class="slide-speaker-text">${slide.speaker_note}</div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+
+      document.getElementById('prevBtn').disabled = idx === 0;
+      document.getElementById('nextBtn').disabled = idx === slides.length - 1;
+      document.getElementById('slideCounter').textContent = `${idx + 1} / ${slides.length}`;
+      document.querySelectorAll('.slide-pip').forEach((p, i) => p.classList.toggle('active', i === idx));
+    }
+
+    function changeSlide(dir) {
+      const slides = deckContent?.slides || [];
+      currentSlide = Math.max(0, Math.min(slides.length - 1, currentSlide + dir));
+      renderSlide(currentSlide);
+    }
+
+    function renderAskSection(data) {
+      document.getElementById('askCard').innerHTML = `
+        <div class="ask-box">
+          <div class="ask-val">${data.ask}</div>
+          <div class="ask-lbl">The Ask</div>
+        </div>
+        <div class="ask-box">
+          <div class="ask-val">${data.valuation}</div>
+          <div class="ask-lbl">Pre-Money Valuation</div>
+        </div>
+      `;
+      document.getElementById('investorQuote').innerHTML = `
+        <div>"${data.lead_investor_quote}"</div>
+        <div class="attribution">Fabricated VC Partner, Probably From A Fund With Marble Floors</div>
+      `;
+    }
+
+    async function runPipeline() {
+      const pitch = document.getElementById('pitchInput').value.trim();
+      const topicA = document.getElementById('topicA').value.trim();
+      const topicB = document.getElementById('topicB').value.trim();
+      if (!pitch || !topicA || !topicB) return;
+
+      document.getElementById('runBtn').disabled = true;
+      document.getElementById('results').classList.remove('visible');
+      document.getElementById('theater').classList.add('visible');
+      deckContent = null;
+      slideImages = [];
+      currentSlide = 0;
+
+      [1, 2, 3].forEach(n => setPhase(n, 'waiting', 'Waiting...'));
+
+      const url = buildApiUrl(`/api/asiathome/stream?pitch=${encodeURIComponent(pitch)}&topicA=${encodeURIComponent(topicA)}&topicB=${encodeURIComponent(topicB)}`);
+      const es = new EventSource(url);
+      let sawContent = false;
+      let reportedError = false;
+
+      es.addEventListener('phase', e => {
+        const { phase, status, label } = JSON.parse(e.data);
+        setPhase(phase, status, label);
+      });
+
+      es.addEventListener('content', e => {
+        sawContent = true;
+        deckContent = JSON.parse(e.data);
+        totalSlides = (deckContent.slides || []).length;
+
+        document.getElementById('slidePips').innerHTML =
+          Array.from({ length: totalSlides }, (_, i) =>
+            `<div class="slide-pip${i === 0 ? ' active' : ''}" onclick="currentSlide=${i};renderSlide(${i})"></div>`
+          ).join('');
+
+        renderMasthead(deckContent);
+        renderASIChain(deckContent.asi_chain || { path: [], connections: [], citations: [], verdict: '' });
+        renderSlide(0);
+        renderAskSection(deckContent);
+        document.getElementById('results').classList.add('visible');
+        document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+      es.addEventListener('image', e => {
+        const { index, image } = JSON.parse(e.data);
+        slideImages[index] = image;
+        if (index === currentSlide) renderSlide(currentSlide);
+      });
+
+      es.addEventListener('done', () => {
+        es.close();
+        document.getElementById('runBtn').disabled = false;
+        renderSlide(currentSlide);
+      });
+
+      es.addEventListener('error', e => {
+        try {
+          const data = JSON.parse(e.data);
+          if (data.message) {
+            alert('Pipeline failure: ' + data.message);
+            document.getElementById('runBtn').disabled = false;
+            es.close();
+            return;
+          }
+        } catch (_) {
+        }
+        if (!reportedError && !sawContent) {
+          reportedError = true;
+          alert(`ASIatHome could not reach the API stream at ${url}. If this is a CORS issue, serve the UI from the same backend origin or use the API button in the top bar to point this page at the correct backend host.`);
+          document.getElementById('runBtn').disabled = false;
+          es.close();
+        }
+      });
+    }
+
+    document.getElementById('topicB').addEventListener('keydown', e => {
+      if (e.key === 'Enter') runPipeline();
+    });
+
+    updateApiBasePill();
+    tickTelemetry();
+    setInterval(tickTelemetry, 2400);
+  </script>
+</body>
+</html>

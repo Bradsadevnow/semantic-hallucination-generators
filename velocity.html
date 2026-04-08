@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VelocityIQ™ — Developer Productivity Intelligence Platform</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    :root {
+      --indigo: #4338ca;
+      --indigo-light: #eef2ff;
+      --indigo-mid: #6366f1;
+      --blue: #2563eb;
+      --green: #059669;
+      --green-light: #d1fae5;
+      --yellow: #d97706;
+      --yellow-light: #fffbeb;
+      --red: #dc2626;
+      --red-light: #fef2f2;
+      --gray-50: #f8f9fa;
+      --gray-100: #f1f3f4;
+      --gray-200: #e8eaed;
+      --gray-400: #9aa0a6;
+      --gray-600: #5f6368;
+      --gray-800: #3c4043;
+      --gray-900: #202124;
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--gray-50); color: var(--gray-900); min-height: 100vh; }
+
+    nav {
+      background: white; border-bottom: 1px solid var(--gray-200);
+      padding: 0 32px; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; color: var(--indigo); text-decoration: none; }
+    .nav-brand .logo-icon { width: 28px; height: 28px; background: var(--indigo); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 800; }
+    .nav-badge { background: var(--indigo-light); color: var(--indigo); font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 99px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .nav-back { font-size: 12px; color: var(--gray-400); text-decoration: none; }
+    .nav-back:hover { color: var(--indigo); }
+
+    .hero { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%); color: white; text-align: center; padding: 56px 24px 64px; }
+    .hero-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; opacity: 0.6; margin-bottom: 12px; }
+    .hero h1 { font-size: 38px; font-weight: 700; line-height: 1.15; margin-bottom: 12px; }
+    .hero h1 .accent { opacity: 0.65; }
+    .hero p { font-size: 15px; opacity: 0.8; max-width: 520px; margin: 0 auto; line-height: 1.6; }
+
+    .trust-bar { background: white; border-bottom: 1px solid var(--gray-200); padding: 12px 32px; display: flex; align-items: center; justify-content: center; gap: 36px; font-size: 11px; color: var(--gray-400); font-weight: 500; flex-wrap: wrap; }
+
+    .main { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+    .card { background: white; border: 1px solid var(--gray-200); border-radius: 12px; padding: 32px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+
+    .input-label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray-600); margin-bottom: 8px; }
+    input[type="text"] { width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray-200); border-radius: var(--radius); font-size: 14px; font-family: inherit; color: var(--gray-900); background: white; transition: border-color 0.15s; }
+    input[type="text"]:focus { outline: none; border-color: var(--indigo); }
+    textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: var(--radius); font-size: 14px; font-family: inherit; color: var(--gray-900); background: white; resize: vertical; min-height: 72px; transition: border-color 0.15s; line-height: 1.5; margin-top: 16px; }
+    textarea:focus { outline: none; border-color: var(--indigo); }
+
+    .btn-run { background: var(--indigo); color: white; border: none; border-radius: var(--radius); padding: 12px 32px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; width: 100%; margin-top: 16px; transition: background 0.15s; }
+    .btn-run:hover { background: #3730a3; }
+    .btn-run:disabled { background: var(--gray-400); cursor: not-allowed; }
+
+    .loading-row { display: none; align-items: center; gap: 12px; margin-top: 16px; font-size: 13px; color: var(--indigo); font-weight: 500; }
+    .loading-row.visible { display: flex; }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(67,56,202,0.2); border-top-color: var(--indigo); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #results { display: none; }
+    #results.visible { display: block; }
+
+    /* Sprint header */
+    .sprint-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .sprint-name { font-size: 20px; font-weight: 700; color: var(--gray-900); }
+    .sprint-team { font-size: 13px; color: var(--gray-400); margin-top: 2px; }
+    .health-circle { width: 80px; height: 80px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 4px solid; flex-shrink: 0; }
+    .health-circle .hval { font-size: 22px; font-weight: 700; line-height: 1; }
+    .health-circle .hlbl { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.7; }
+
+    /* DORA */
+    .dora-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+    .dora-box { background: white; border: 1px solid var(--gray-200); border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .dora-val { font-size: 26px; font-weight: 700; color: var(--indigo); margin-bottom: 2px; font-family: 'JetBrains Mono', monospace; }
+    .dora-lbl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-400); margin-bottom: 6px; }
+    .dora-sub { font-size: 11px; color: var(--gray-400); }
+    .dora-box.good .dora-val { color: var(--green); }
+    .dora-box.warn .dora-val { color: var(--yellow); }
+    .dora-box.bad  .dora-val { color: var(--red); }
+
+    /* Story points bar */
+    .sp-section { margin-bottom: 20px; }
+    .sp-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+    .sp-title { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+    .sp-meta { font-size: 12px; color: var(--gray-400); }
+    .sp-bar-track { height: 16px; background: var(--gray-100); border-radius: 99px; overflow: hidden; position: relative; }
+    .sp-bar-delivered { height: 100%; background: var(--green); border-radius: 99px; transition: width 0.8s ease; }
+    .sp-bar-carryover { height: 100%; background: var(--yellow); position: absolute; right: 0; top: 0; border-radius: 0 99px 99px 0; }
+    .sp-legend { display: flex; gap: 16px; margin-top: 6px; font-size: 11px; color: var(--gray-600); }
+    .sp-legend span { display: flex; align-items: center; gap: 4px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+    /* Two-col layout */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+    /* Performers table */
+    .perf-table { width: 100%; border-collapse: collapse; }
+    .perf-table th { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-400); padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--gray-200); }
+    .perf-table td { font-size: 13px; padding: 10px 12px; border-bottom: 1px solid var(--gray-100); }
+    .perf-table tr:last-child td { border-bottom: none; }
+    .perf-name { font-weight: 600; color: var(--gray-800); }
+    .perf-num { font-family: 'JetBrains Mono', monospace; color: var(--indigo); font-weight: 500; }
+
+    /* Blockers */
+    .blocker-list { display: flex; flex-direction: column; gap: 10px; }
+    .blocker-item { padding: 12px 16px; border-radius: 8px; border: 1px solid; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .blocker-item.MONITORING { background: var(--yellow-light); border-color: #fcd34d; }
+    .blocker-item.RESOLVED { background: var(--green-light); border-color: #6ee7b7; }
+    .blocker-item.ESCALATED { background: var(--red-light); border-color: #fecaca; }
+    .blocker-desc { font-size: 13px; line-height: 1.4; }
+    .blocker-item.MONITORING .blocker-desc { color: #78350f; }
+    .blocker-item.RESOLVED .blocker-desc { color: #064e3b; }
+    .blocker-item.ESCALATED .blocker-desc { color: #7f1d1d; }
+    .blocker-meta { text-align: right; flex-shrink: 0; }
+    .blocker-status { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .blocker-days { font-size: 11px; color: var(--gray-400); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+
+    /* Retrospective */
+    .retro-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .retro-col { border-radius: 10px; padding: 20px; border: 1px solid; }
+    .retro-col.went-well { background: var(--green-light); border-color: #6ee7b7; }
+    .retro-col.improve { background: var(--yellow-light); border-color: #fcd34d; }
+    .retro-col.actions { background: var(--indigo-light); border-color: rgba(67,56,202,0.2); }
+    .retro-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
+    .retro-col.went-well .retro-title { color: #065f46; }
+    .retro-col.improve .retro-title { color: #78350f; }
+    .retro-col.actions .retro-title { color: var(--indigo); }
+    .retro-item { font-size: 13px; line-height: 1.5; padding: 6px 0; border-bottom: 1px dashed rgba(0,0,0,0.08); }
+    .retro-item:last-child { border-bottom: none; }
+    .retro-col.went-well .retro-item { color: #064e3b; }
+    .retro-col.improve .retro-item { color: #78350f; }
+    .retro-col.actions .retro-item { color: #3730a3; }
+
+    /* AI Scrum Master */
+    .scrum-box { background: linear-gradient(135deg, var(--indigo-light) 0%, white 100%); border: 1px solid rgba(67,56,202,0.2); border-radius: 10px; padding: 24px; margin-bottom: 16px; }
+    .scrum-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .scrum-avatar { width: 36px; height: 36px; background: var(--indigo); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .scrum-by { font-size: 11px; font-weight: 600; color: var(--indigo); }
+    .scrum-role { font-size: 10px; color: var(--gray-400); }
+    .scrum-text { font-size: 14px; color: var(--gray-800); line-height: 1.7; font-style: italic; }
+
+    .prediction-box { background: var(--indigo); color: white; border-radius: 10px; padding: 20px; display: flex; gap: 12px; align-items: flex-start; }
+    .pred-icon { font-size: 20px; flex-shrink: 0; }
+    .pred-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.6; margin-bottom: 6px; }
+    .pred-text { font-size: 14px; line-height: 1.6; opacity: 0.9; font-style: italic; }
+
+    .section-title { font-size: 13px; font-weight: 600; color: var(--gray-800); margin-bottom: 14px; }
+
+    footer { text-align: center; padding: 32px; font-size: 11px; color: var(--gray-400); border-top: 1px solid var(--gray-200); line-height: 1.8; }
+
+    @media (max-width: 700px) {
+      .dora-grid { grid-template-columns: repeat(2, 1fr); }
+      .two-col { grid-template-columns: 1fr; }
+      .retro-grid { grid-template-columns: 1fr; }
+      .sprint-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">
+    <div class="logo-icon">V</div>
+    VelocityIQ™
+    <span class="nav-badge">DORA</span>
+  </a>
+  <a class="nav-back" href="index.html">← Back to Platform</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">Developer Productivity Intelligence Platform</div>
+  <h1>Ship Faster.<br/><span class="accent">Measure Everything.</span></h1>
+  <p>AI-generated DORA metrics, sprint analytics, and retrospective insights that tell you nothing about your actual engineering productivity — at enterprise scale.</p>
+</div>
+
+<div class="trust-bar">
+  <span>📊 DORA Elite Tier Benchmarks</span>
+  <span>🤖 AI Scrum Master Included</span>
+  <span>📈 Velocity Trends Since Yesterday</span>
+  <span>🔮 Predictive Sprint Forecasting</span>
+</div>
+
+<div class="main">
+
+  <div class="card">
+    <label class="input-label" for="teamInput">Team Name</label>
+    <input type="text" id="teamInput" placeholder="e.g. &quot;Platform Engineering&quot; or &quot;Team Nebula&quot;" />
+
+    <label class="input-label" style="margin-top:16px">Sprint Context <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional — describe what actually happened)</span></label>
+    <textarea id="contextInput" placeholder="e.g. &quot;We mostly argued about a PR for 3 days, deployed on Friday, broke staging, and the senior dev was on PTO&quot;"></textarea>
+
+    <button class="btn-run" id="runBtn" onclick="runVelocity()">📊 Generate Sprint Report</button>
+    <div class="loading-row" id="loading">
+      <div class="spinner"></div>
+      Synthesizing DORA metrics... calibrating cognitive load index... consulting AI Scrum Master...
+    </div>
+  </div>
+
+  <div id="results">
+
+    <div class="card">
+      <div class="sprint-header">
+        <div>
+          <div class="sprint-name" id="sprintName">—</div>
+          <div class="sprint-team" id="sprintTeamLabel">—</div>
+        </div>
+        <div class="health-circle" id="healthCircle">
+          <div class="hval" id="healthVal">—</div>
+          <div class="hlbl">Health</div>
+        </div>
+      </div>
+
+      <div class="sp-section">
+        <div class="sp-header">
+          <div class="sp-title">Story Point Delivery</div>
+          <div class="sp-meta" id="spMeta">—</div>
+        </div>
+        <div class="sp-bar-track">
+          <div class="sp-bar-delivered" id="spBarDelivered" style="width:0%"></div>
+          <div class="sp-bar-carryover" id="spBarCarryover" style="width:0%"></div>
+        </div>
+        <div class="sp-legend">
+          <span><div class="dot" style="background:var(--green)"></div> Delivered</span>
+          <span><div class="dot" style="background:var(--yellow)"></div> Carryover</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:24px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-400);margin-bottom:4px">Flow Efficiency</div>
+          <div style="font-size:20px;font-weight:700;color:var(--indigo);font-family:'JetBrains Mono',monospace" id="flowEff">—</div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-400);margin-bottom:4px">Cognitive Load</div>
+          <div style="font-size:20px;font-weight:700;color:var(--yellow);font-family:'JetBrains Mono',monospace" id="cogLoad">—</div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-400);margin-bottom:4px">Velocity Trend</div>
+          <div style="font-size:20px;font-weight:700;color:var(--green);font-family:'JetBrains Mono',monospace" id="velTrend">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dora-grid" id="doraGrid"></div>
+
+    <div class="two-col">
+      <div class="card" style="margin-bottom:0;padding:24px">
+        <div class="section-title">🏆 Top Performers</div>
+        <table class="perf-table">
+          <thead>
+            <tr>
+              <th>Dev</th>
+              <th>Points</th>
+              <th>PRs</th>
+              <th>Review (h)</th>
+            </tr>
+          </thead>
+          <tbody id="perfTable"></tbody>
+        </table>
+      </div>
+      <div class="card" style="margin-bottom:0;padding:24px">
+        <div class="section-title">🚧 Active Blockers</div>
+        <div class="blocker-list" id="blockerList"></div>
+      </div>
+    </div>
+
+    <div style="height:20px"></div>
+
+    <div class="retro-grid" id="retroGrid"></div>
+
+    <div class="scrum-box">
+      <div class="scrum-header">
+        <div class="scrum-avatar">🤖</div>
+        <div>
+          <div class="scrum-by">AgileBot-7 · AI Scrum Master</div>
+          <div class="scrum-role">Certified by no one in particular</div>
+        </div>
+      </div>
+      <div class="scrum-text" id="scrumNote">—</div>
+    </div>
+
+    <div class="prediction-box">
+      <div class="pred-icon">🔮</div>
+      <div>
+        <div class="pred-label">Next Sprint Prediction</div>
+        <div class="pred-text" id="nextSprint">—</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<footer>
+  VelocityIQ™ — Developer Productivity Intelligence Platform<br/>
+  All metrics are fabricated. All predictions are wrong. All developers are fictional.<br/>
+  © 2026 Cheap Gags™ &nbsp;·&nbsp; <a href="index.html" style="color:inherit">Platform Home</a>
+</footer>
+
+<script>
+function getHealthStyle(score) {
+  if (score >= 80) return { color: 'var(--green)', border: '#6ee7b7' };
+  if (score >= 60) return { color: 'var(--yellow)', border: '#fcd34d' };
+  return { color: 'var(--red)', border: '#fecaca' };
+}
+
+function getDoraClass(metric, val) {
+  // DORA elite thresholds (rough)
+  if (metric === 'lead_time_hours') return val <= 24 ? 'good' : val <= 168 ? 'warn' : 'bad';
+  if (metric === 'mttr_minutes') return val <= 60 ? 'good' : val <= 480 ? 'warn' : 'bad';
+  return 'good';
+}
+
+async function runVelocity() {
+  const team = document.getElementById('teamInput').value.trim();
+  if (!team) return;
+  const context = document.getElementById('contextInput').value.trim();
+
+  document.getElementById('runBtn').disabled = true;
+  document.getElementById('loading').classList.add('visible');
+  document.getElementById('results').classList.remove('visible');
+
+  try {
+    const res = await fetch('/api/velocity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ team, context })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    // Sprint header
+    document.getElementById('sprintName').textContent = data.sprint_name || 'Sprint Report';
+    document.getElementById('sprintTeamLabel').textContent = team;
+
+    // Health
+    const health = data.health_score || 0;
+    const hs = getHealthStyle(health);
+    const hc = document.getElementById('healthCircle');
+    hc.style.borderColor = hs.border;
+    document.getElementById('healthVal').style.color = hs.color;
+    document.getElementById('healthVal').textContent = health;
+
+    // Story points
+    const sp = data.story_points || {};
+    const committed = sp.committed || 1;
+    const delivered = sp.delivered || 0;
+    const carryover = sp.carryover || 0;
+    document.getElementById('spMeta').textContent = `${delivered} delivered / ${committed} committed / ${carryover} carryover`;
+    setTimeout(() => {
+      document.getElementById('spBarDelivered').style.width = ((delivered / committed) * 100) + '%';
+      document.getElementById('spBarCarryover').style.width = ((carryover / committed) * 100) + '%';
+    }, 100);
+
+    // Other stats
+    document.getElementById('flowEff').textContent = (data.flow_efficiency || 0) + '%';
+    document.getElementById('cogLoad').textContent = (data.cognitive_load_index || 0) + '/10';
+    document.getElementById('velTrend').textContent = data.velocity_trend || '—';
+
+    // DORA
+    const dora = data.dora || {};
+    document.getElementById('doraGrid').innerHTML = `
+      <div class="dora-box ${getDoraClass('deploy','x')}">
+        <div class="dora-lbl">Deployment Frequency</div>
+        <div class="dora-val">${dora.deployment_frequency || '—'}</div>
+        <div class="dora-sub">Elite: &gt; 1/day</div>
+      </div>
+      <div class="dora-box ${getDoraClass('lead_time_hours', dora.lead_time_hours)}">
+        <div class="dora-lbl">Lead Time for Changes</div>
+        <div class="dora-val">${dora.lead_time_hours || '—'}h</div>
+        <div class="dora-sub">Elite: &lt; 1 hour</div>
+      </div>
+      <div class="dora-box good">
+        <div class="dora-lbl">Change Failure Rate</div>
+        <div class="dora-val">${dora.change_failure_rate || '—'}</div>
+        <div class="dora-sub">Elite: &lt; 5%</div>
+      </div>
+      <div class="dora-box ${getDoraClass('mttr_minutes', dora.mttr_minutes)}">
+        <div class="dora-lbl">Mean Time to Recover</div>
+        <div class="dora-val">${dora.mttr_minutes || '—'}m</div>
+        <div class="dora-sub">Elite: &lt; 1 hour</div>
+      </div>
+    `;
+
+    // Performers
+    const tbody = document.getElementById('perfTable');
+    tbody.innerHTML = '';
+    (data.top_performers || []).forEach(p => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="perf-name">${p.name}</td>
+        <td class="perf-num">${p.points}</td>
+        <td class="perf-num">${p.prs_merged}</td>
+        <td class="perf-num">${p.review_turnaround_hrs}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // Blockers
+    const blockerList = document.getElementById('blockerList');
+    blockerList.innerHTML = '';
+    (data.blockers || []).forEach(b => {
+      const status = b.status || 'MONITORING';
+      const div = document.createElement('div');
+      div.className = `blocker-item ${status}`;
+      div.innerHTML = `
+        <div class="blocker-desc">${b.description}</div>
+        <div class="blocker-meta">
+          <div class="blocker-status">${status}</div>
+          <div class="blocker-days">${b.days_open}d open</div>
+        </div>
+      `;
+      blockerList.appendChild(div);
+    });
+
+    // Retro
+    const retro = data.retrospective || {};
+    document.getElementById('retroGrid').innerHTML = `
+      <div class="retro-col went-well">
+        <div class="retro-title">✅ Went Well</div>
+        ${(retro.went_well || []).map(i => `<div class="retro-item">${i}</div>`).join('')}
+      </div>
+      <div class="retro-col improve">
+        <div class="retro-title">⚠️ Needs Improvement</div>
+        ${(retro.improve || []).map(i => `<div class="retro-item">${i}</div>`).join('')}
+      </div>
+      <div class="retro-col actions">
+        <div class="retro-title">📋 Action Items</div>
+        ${(retro.actions || []).map(i => `<div class="retro-item">${i}</div>`).join('')}
+      </div>
+    `;
+
+    // AI Scrum Master
+    document.getElementById('scrumNote').textContent = data.ai_scrum_master_note || '—';
+    document.getElementById('nextSprint').textContent = data.next_sprint_prediction || '—';
+
+    document.getElementById('results').classList.add('visible');
+
+  } catch (err) {
+    alert('VelocityIQ™ encountered a sprint anomaly: ' + err.message);
+  } finally {
+    document.getElementById('runBtn').disabled = false;
+    document.getElementById('loading').classList.remove('visible');
+  }
+}
+
+document.getElementById('teamInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') runVelocity();
+});
+</script>
+
+</body>
+</html>

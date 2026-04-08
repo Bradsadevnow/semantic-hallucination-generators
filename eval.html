@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EvalForge™ — The Great Pitch Bake-Off</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --blue: #0052cc;
+      --blue-light: #e8f0fe;
+      --green: #059669;
+      --green-light: #d1fae5;
+      --purple: #7c3aed;
+      --purple-light: #ede9fe;
+      --claude-color: #0052cc;
+      --openai-color: #059669;
+      --gray-50: #f8f9fa;
+      --gray-100: #f1f3f4;
+      --gray-200: #e8eaed;
+      --gray-400: #9aa0a6;
+      --gray-600: #5f6368;
+      --gray-800: #3c4043;
+      --gray-900: #202124;
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--gray-50); color: var(--gray-900); min-height: 100vh; }
+
+    nav {
+      background: white; border-bottom: 1px solid var(--gray-200);
+      padding: 0 32px; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; color: var(--purple); text-decoration: none; }
+    .nav-brand .logo-icon { width: 28px; height: 28px; background: var(--purple); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 800; }
+    .nav-badge { background: var(--purple-light); color: var(--purple); font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 99px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .nav-back { font-size: 12px; color: var(--gray-400); text-decoration: none; }
+    .nav-back:hover { color: var(--purple); }
+
+    .hero { background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 50%, #7c3aed 100%); color: white; text-align: center; padding: 56px 24px 64px; }
+    .hero-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; margin-bottom: 12px; }
+    .hero h1 { font-size: 38px; font-weight: 700; line-height: 1.15; margin-bottom: 12px; }
+    .hero h1 span { opacity: 0.7; }
+    .hero p { font-size: 15px; opacity: 0.85; max-width: 520px; margin: 0 auto; line-height: 1.6; }
+
+    .trust-bar { background: white; border-bottom: 1px solid var(--gray-200); padding: 12px 32px; display: flex; align-items: center; justify-content: center; gap: 36px; font-size: 11px; color: var(--gray-400); font-weight: 500; flex-wrap: wrap; }
+
+    .main { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+    .card { background: white; border: 1px solid var(--gray-200); border-radius: 12px; padding: 32px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+
+    textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: var(--radius); font-size: 14px; font-family: inherit; color: var(--gray-900); background: white; resize: vertical; min-height: 72px; transition: border-color 0.15s; line-height: 1.5; }
+    textarea:focus { outline: none; border-color: var(--purple); }
+    .input-label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray-600); margin-bottom: 8px; }
+
+    .btn-run { background: var(--purple); color: white; border: none; border-radius: var(--radius); padding: 12px 32px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; width: 100%; margin-top: 16px; transition: background 0.15s; }
+    .btn-run:hover { background: #6d28d9; }
+    .btn-run:disabled { background: var(--gray-400); cursor: not-allowed; }
+
+    .loading-row { display: none; align-items: center; gap: 12px; margin-top: 16px; font-size: 13px; color: var(--purple); font-weight: 500; }
+    .loading-row.visible { display: flex; }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(124,58,237,0.2); border-top-color: var(--purple); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Results grid — 2 col */
+    #results { display: none; }
+    #results.visible { display: block; }
+    .decks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+
+    /* Deck card */
+    .deck-card { border-radius: 12px; overflow: hidden; border: 1px solid var(--gray-200); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .deck-header { padding: 18px 24px; color: white; }
+    .deck-header.claude { background: linear-gradient(135deg, #003d99, #0052cc); }
+    .deck-header.openai { background: linear-gradient(135deg, #065f46, #059669); }
+    .deck-header.mystery { background: linear-gradient(135deg, #374151, #6b7280); }
+    .deck-model-name { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; margin-bottom: 6px; }
+    .deck-company { font-size: 20px; font-weight: 700; margin-bottom: 2px; }
+    .deck-tagline { font-size: 12px; opacity: 0.8; font-style: italic; }
+
+    /* Slide viewer */
+    .slide-viewer { background: white; }
+    .slide-nav { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--gray-100); }
+    .slide-nav-btns { display: flex; gap: 6px; }
+    .slide-nav-btn { width: 28px; height: 28px; border: 1.5px solid var(--gray-200); border-radius: 6px; background: white; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .slide-nav-btn:hover { background: var(--gray-100); }
+    .slide-nav-btn:disabled { opacity: 0.3; cursor: default; }
+    .slide-counter { font-size: 11px; font-weight: 600; color: var(--gray-400); }
+    .slide-pip-row { display: flex; gap: 4px; }
+    .slide-pip { width: 6px; height: 6px; border-radius: 50%; background: var(--gray-200); cursor: pointer; transition: background 0.15s; }
+    .slide-pip.active { background: var(--purple); }
+
+    .slide-body { padding: 20px 24px; min-height: 220px; }
+    .slide-title { font-size: 16px; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
+    .slide-subtitle { font-size: 12px; color: var(--purple); font-weight: 500; margin-bottom: 14px; }
+    .slide-bullets { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .slide-bullets li { font-size: 13px; color: var(--gray-700); line-height: 1.5; display: flex; gap: 8px; }
+    .slide-bullets li::before { content: '→'; color: var(--gray-400); flex-shrink: 0; }
+    .slide-speaker-note { margin-top: 16px; padding: 10px 14px; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 6px; font-size: 11px; color: #78350f; font-style: italic; line-height: 1.5; }
+    .slide-speaker-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #d97706; margin-bottom: 4px; }
+
+    /* Ask footer */
+    .deck-ask { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; background: var(--gray-50); border-top: 1px solid var(--gray-200); }
+    .deck-ask-item { text-align: center; }
+    .deck-ask-val { font-size: 16px; font-weight: 700; color: var(--gray-900); }
+    .deck-ask-lbl { font-size: 10px; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.5px; }
+    .deck-investor-quote { padding: 12px 24px; font-size: 11px; color: var(--gray-500); font-style: italic; border-top: 1px solid var(--gray-100); line-height: 1.5; }
+
+    /* Vote panel */
+    .vote-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .vote-cat { text-align: center; }
+    .vote-cat-label { font-size: 11px; font-weight: 600; color: var(--gray-600); margin-bottom: 10px; }
+    .vote-btns { display: flex; gap: 8px; justify-content: center; }
+    .vote-btn { flex: 1; padding: 10px 8px; border: 2px solid var(--gray-200); border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; background: white; transition: all 0.15s; }
+    .vote-btn.claude:hover { border-color: var(--claude-color); color: var(--claude-color); }
+    .vote-btn.openai:hover { border-color: var(--openai-color); color: var(--openai-color); }
+    .vote-btn.winner { color: white; }
+    .vote-btn.winner.claude { background: var(--claude-color); border-color: var(--claude-color); }
+    .vote-btn.winner.openai { background: var(--openai-color); border-color: var(--openai-color); }
+    .vote-btn:disabled { opacity: 0.5; cursor: default; }
+
+    /* Leaderboard */
+    .lb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+    .lb-model { border-radius: 10px; overflow: hidden; }
+    .lb-header-inner { padding: 16px; color: white; text-align: center; }
+    .lb-header-inner.claude { background: var(--claude-color); }
+    .lb-header-inner.openai { background: var(--openai-color); }
+    .lb-name { font-size: 14px; font-weight: 700; }
+    .lb-total { font-size: 32px; font-weight: 700; margin: 4px 0; }
+    .lb-total-lbl { font-size: 10px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
+    .lb-body { background: white; border: 1px solid var(--gray-200); border-top: none; border-radius: 0 0 10px 10px; padding: 12px; }
+    .lb-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 12px; border-bottom: 1px solid var(--gray-100); }
+    .lb-row:last-child { border-bottom: none; }
+    .lb-row-lbl { color: var(--gray-600); }
+    .lb-row-val { font-weight: 700; }
+
+    footer { text-align: center; padding: 32px; font-size: 11px; color: var(--gray-400); border-top: 1px solid var(--gray-200); line-height: 1.8; }
+
+    @media (max-width: 900px) {
+      .decks-grid { grid-template-columns: 1fr; }
+      .vote-grid { grid-template-columns: 1fr; }
+      .lb-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">
+    <div class="logo-icon">E</div>
+    EvalForge™
+    <span class="nav-badge">Pitch Battle</span>
+  </a>
+  <a class="nav-back" href="index.html">← All Products</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">AI Model Comparison Engine</div>
+  <h1>EvalForge™<br/><span>The Great Pitch Bake-Off</span></h1>
+  <p>Two models. One startup idea. Same prompt, different decks. Vote on whose slides would survive a room full of VCs who haven't slept.</p>
+</div>
+
+<div class="trust-bar">
+  <span>⚗️ Claude (Haiku) vs GPT-4o Mini</span>
+  <span>🎭 Blind Mode Available</span>
+  <span>🗳️ Vote on 3 Categories</span>
+  <span>📊 Running Leaderboard</span>
+</div>
+
+<div class="main">
+
+  <div class="card">
+    <label class="input-label">Startup Idea</label>
+    <textarea id="ideaInput" placeholder='e.g. "Uber but for emotional support animals" or "B2B SaaS for enterprise snack procurement"'></textarea>
+
+    <div style="margin-top:12px;display:flex;align-items:center;gap:10px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--gray-600);user-select:none">
+        <input type="checkbox" id="blindMode" style="width:15px;height:15px;accent-color:var(--purple);cursor:pointer" />
+        🎭 Blind Mode — hide model names until after you vote
+      </label>
+    </div>
+
+    <button class="btn-run" id="runBtn" onclick="runEval()">⚗️ Run the Eval</button>
+    <div class="loading-row" id="loading">
+      <div class="spinner"></div>
+      Generating decks... both models are furiously writing slides right now...
+    </div>
+  </div>
+
+  <div id="results">
+
+    <div class="decks-grid" id="decksGrid"></div>
+
+    <div class="card" id="voteCard">
+      <div style="font-size:15px;font-weight:700;margin-bottom:20px">🗳️ Cast Your Votes</div>
+      <div class="vote-grid">
+        <div class="vote-cat">
+          <div class="vote-cat-label">🏆 Best Hook</div>
+          <div class="vote-btns" id="voteHook"></div>
+        </div>
+        <div class="vote-cat">
+          <div class="vote-cat-label">📊 Most Convincing BS</div>
+          <div class="vote-btns" id="voteBS"></div>
+        </div>
+        <div class="vote-cat">
+          <div class="vote-cat-label">💀 Most Unhinged</div>
+          <div class="vote-btns" id="voteUnhinged"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="leaderboardCard">
+      <div style="font-size:15px;font-weight:700;margin-bottom:4px">Running Leaderboard</div>
+      <div style="font-size:12px;color:var(--gray-400);margin-bottom:16px" id="evalCount"></div>
+      <div class="lb-grid" id="lbGrid"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<footer>
+  EvalForge™ — The Great Pitch Bake-Off<br/>
+  No VCs were harmed. No funding was raised. All decks are fabricated.<br/>
+  © 2026 Cheap Gags™ &nbsp;·&nbsp; <a href="index.html" style="color:inherit">Platform Home</a>
+</footer>
+
+<script>
+let currentOrder = ['claude', 'openai']; // may be shuffled
+let deckData = {};
+const votes = { hook: {}, bs: {}, unhinged: {} };
+let serverVotes = { claude: 0, openai: 0 };
+
+function buildSlideViewer(model, data) {
+  const slides = data.slides || [];
+  const viewerId = `viewer-${model}`;
+
+  let html = `<div class="slide-viewer" id="${viewerId}">`;
+  html += `
+    <div class="slide-nav">
+      <div class="slide-nav-btns">
+        <button class="slide-nav-btn" id="prev-${model}" onclick="changeSlide('${model}',-1)" disabled>‹</button>
+        <button class="slide-nav-btn" id="next-${model}" onclick="changeSlide('${model}',1)">›</button>
+      </div>
+      <div class="slide-pip-row" id="pips-${model}">
+        ${slides.map((_, i) => `<div class="slide-pip ${i===0?'active':''}" onclick="goSlide('${model}',${i})"></div>`).join('')}
+      </div>
+      <div class="slide-counter" id="counter-${model}">1 / ${slides.length}</div>
+    </div>
+    <div id="slide-content-${model}" class="slide-body"></div>
+  `;
+  html += `</div>`;
+  return html;
+}
+
+function renderSlide(model, idx) {
+  const slides = deckData[model]?.slides || [];
+  const slide = slides[idx];
+  if (!slide) return;
+
+  const el = document.getElementById(`slide-content-${model}`);
+  el.innerHTML = `
+    <div class="slide-title">${slide.title}</div>
+    <div class="slide-subtitle">${slide.subtitle || ''}</div>
+    <ul class="slide-bullets">
+      ${(slide.bullets || []).map(b => `<li>${b}</li>`).join('')}
+    </ul>
+    ${slide.speaker_note ? `
+      <div class="slide-speaker-note">
+        <div class="slide-speaker-label">What the founder is actually thinking:</div>
+        ${slide.speaker_note}
+      </div>
+    ` : ''}
+  `;
+
+  // Update nav
+  document.getElementById(`prev-${model}`).disabled = idx === 0;
+  document.getElementById(`next-${model}`).disabled = idx === slides.length - 1;
+  document.getElementById(`counter-${model}`).textContent = `${idx + 1} / ${slides.length}`;
+  document.querySelectorAll(`#pips-${model} .slide-pip`).forEach((p, i) => {
+    p.classList.toggle('active', i === idx);
+  });
+}
+
+const slideIdx = {};
+
+function changeSlide(model, dir) {
+  const slides = deckData[model]?.slides || [];
+  slideIdx[model] = Math.max(0, Math.min(slides.length - 1, (slideIdx[model] || 0) + dir));
+  renderSlide(model, slideIdx[model]);
+}
+
+function goSlide(model, idx) {
+  slideIdx[model] = idx;
+  renderSlide(model, idx);
+}
+
+function renderDeck(model, data, isBlind, label) {
+  const displayLabel = isBlind ? label : (model === 'claude' ? 'Claude Haiku' : 'GPT-4o Mini');
+  const headerClass = isBlind ? 'mystery' : model;
+
+  const card = document.createElement('div');
+  card.className = 'deck-card';
+  card.id = `deck-${model}`;
+  card.innerHTML = `
+    <div class="deck-header ${headerClass}">
+      <div class="deck-model-name" id="model-label-${model}">${displayLabel}</div>
+      <div class="deck-company">${data.company_name || '—'}</div>
+      <div class="deck-tagline">${data.tagline || ''}</div>
+    </div>
+    ${buildSlideViewer(model, data)}
+    <div class="deck-ask">
+      <div class="deck-ask-item"><div class="deck-ask-val">${data.ask || '—'}</div><div class="deck-ask-lbl">Asking</div></div>
+      <div class="deck-ask-item"><div class="deck-ask-val">${data.valuation || '—'}</div><div class="deck-ask-lbl">Valuation</div></div>
+    </div>
+    <div class="deck-investor-quote">"${data.lead_investor_quote || ''}"<br/><span style="font-size:10px;opacity:0.7">— Fabricated VC Partner</span></div>
+  `;
+  document.getElementById('decksGrid').appendChild(card);
+  slideIdx[model] = 0;
+  renderSlide(model, 0);
+}
+
+function buildVoteButtons(category, domId) {
+  const el = document.getElementById(domId);
+  el.innerHTML = '';
+  currentOrder.forEach((model, i) => {
+    const isBlind = document.getElementById('blindMode').checked;
+    const label = isBlind ? `Model ${String.fromCharCode(65 + i)}` : (model === 'claude' ? 'Claude' : 'GPT-4o Mini');
+    const btn = document.createElement('button');
+    btn.className = `vote-btn ${model}`;
+    btn.id = `vote-${category}-${model}`;
+    btn.textContent = label;
+    btn.onclick = () => castVote(category, model, domId);
+    el.appendChild(btn);
+  });
+}
+
+function castVote(category, model, domId) {
+  if (votes[category][model] !== undefined) return;
+  votes[category][model] = true;
+
+  document.querySelectorAll(`#${domId} .vote-btn`).forEach(btn => {
+    btn.disabled = true;
+  });
+  const winner = document.getElementById(`vote-${category}-${model}`);
+  winner.classList.add('winner', model);
+
+  fetch('/api/vote', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ category, model })
+  }).then(r => r.json()).then(data => {
+    if (data.votes) updateLeaderboard(data.votes);
+  });
+}
+
+function updateLeaderboard(v) {
+  ['claude', 'openai'].forEach(model => {
+    const total = (v.hook?.[model] || 0) + (v.bs?.[model] || 0) + (v.unhinged?.[model] || 0);
+    const el = document.getElementById(`lb-total-${model}`);
+    if (el) el.textContent = total;
+    ['hook','bs','unhinged'].forEach(cat => {
+      const cel = document.getElementById(`lb-${cat}-${model}`);
+      if (cel) cel.textContent = v[cat]?.[model] || 0;
+    });
+  });
+}
+
+async function runEval() {
+  const idea = document.getElementById('ideaInput').value.trim();
+  if (!idea) return;
+
+  document.getElementById('runBtn').disabled = true;
+  document.getElementById('loading').classList.add('visible');
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('decksGrid').innerHTML = '';
+
+  try {
+    const [evalRes, lbRes] = await Promise.all([
+      fetch('/api/eval', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idea }) }).then(r => r.json()),
+      fetch('/api/leaderboard').then(r => r.json())
+    ]);
+
+    if (evalRes.error) throw new Error(evalRes.error);
+
+    const isBlind = document.getElementById('blindMode').checked;
+    deckData = { claude: evalRes.claude, openai: evalRes.openai };
+
+    // Shuffle order if blind
+    currentOrder = ['claude', 'openai'];
+    if (isBlind) currentOrder.sort(() => Math.random() - 0.5);
+
+    currentOrder.forEach((model, i) => {
+      const data = deckData[model];
+      if (data && !data.error) {
+        const label = `Model ${String.fromCharCode(65 + i)}`;
+        renderDeck(model, data, isBlind, label);
+      }
+    });
+
+    // Vote buttons
+    Object.entries(votes).forEach(([cat]) => { votes[cat] = {}; });
+    buildVoteButtons('hook', 'voteHook');
+    buildVoteButtons('bs', 'voteBS');
+    buildVoteButtons('unhinged', 'voteUnhinged');
+
+    // Leaderboard
+    document.getElementById('evalCount').textContent = `${evalRes.totalEvals} eval${evalRes.totalEvals === 1 ? '' : 's'} run`;
+    renderLeaderboardShell();
+    if (lbRes.votes) updateLeaderboard(lbRes.votes);
+
+    document.getElementById('results').classList.add('visible');
+
+  } catch (err) {
+    alert('EvalForge™ encountered a judging failure: ' + err.message);
+  } finally {
+    document.getElementById('runBtn').disabled = false;
+    document.getElementById('loading').classList.remove('visible');
+  }
+}
+
+function renderLeaderboardShell() {
+  const grid = document.getElementById('lbGrid');
+  grid.innerHTML = ['claude', 'openai'].map(model => {
+    const name = model === 'claude' ? 'Claude Haiku' : 'GPT-4o Mini';
+    return `
+      <div class="lb-model">
+        <div class="lb-header-inner ${model}">
+          <div class="lb-name">${name}</div>
+          <div class="lb-total" id="lb-total-${model}">0</div>
+          <div class="lb-total-lbl">total votes</div>
+        </div>
+        <div class="lb-body">
+          <div class="lb-row"><span class="lb-row-lbl">Best Hook</span><span class="lb-row-val" id="lb-hook-${model}">0</span></div>
+          <div class="lb-row"><span class="lb-row-lbl">Most Convincing BS</span><span class="lb-row-val" id="lb-bs-${model}">0</span></div>
+          <div class="lb-row"><span class="lb-row-lbl">Most Unhinged</span><span class="lb-row-val" id="lb-unhinged-${model}">0</span></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+document.getElementById('ideaInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.metaKey) runEval();
+});
+</script>
+
+</body>
+</html>

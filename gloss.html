@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gloss</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+    :root {
+      --bg: #f5f2ea;
+      --text: #111827;
+      --muted: #667085;
+      --soft: #98a2b3;
+      --line: rgba(17, 24, 39, 0.1);
+      --surface: rgba(255, 255, 255, 0.84);
+      --surface-strong: rgba(255, 255, 255, 0.96);
+      --blue: #74a7ff;
+      --amber: #ffb347;
+      --magenta: #ff63d8;
+      --green: #b4ff67;
+      --shadow: 0 24px 60px rgba(17, 24, 39, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Manrope', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top center, rgba(116, 167, 255, 0.13), transparent 20%),
+        linear-gradient(180deg, #faf8f4 0%, #f2eee5 100%);
+    }
+    a { color: inherit; text-decoration: none; }
+    button, textarea { font: inherit; }
+
+    .page {
+      width: min(1400px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 18px 0 34px;
+      display: grid;
+      gap: 22px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(17,24,39,0.04);
+      position: sticky;
+      top: 14px;
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-mark {
+      width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center;
+      background: linear-gradient(135deg, #fff, #eef2ff); border: 1px solid var(--line); color: #2051ff; font-weight: 800;
+    }
+    .eyebrow, .micro {
+      font-family: 'IBM Plex Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 11px;
+      color: var(--soft);
+    }
+    .brand h1 { font-size: 18px; line-height: 1.1; }
+    .brand p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .top-links { display: flex; gap: 10px; flex-wrap: wrap; }
+    .pill {
+      padding: 8px 12px; border-radius: 999px; border: 1px solid var(--line);
+      background: rgba(255,255,255,0.65); font-size: 12px; color: var(--muted);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 290px minmax(0, 1fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .side {
+      position: sticky; top: 96px;
+      display: grid; gap: 18px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .mode-grid { display: grid; gap: 10px; margin-top: 14px; }
+    .mode-btn {
+      width: 100%; text-align: left; padding: 14px; border-radius: 20px; border: 1px solid transparent;
+      background: rgba(255,255,255,0.64); cursor: pointer; transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+    .mode-btn:hover { transform: translateY(-1px); }
+    .mode-btn.active { border-color: rgba(32,81,255,0.18); background: rgba(255,255,255,0.94); }
+    .mode-btn strong { display:block; font-size: 15px; }
+    .mode-btn span { display:block; font-size: 12px; line-height: 1.55; color: var(--muted); margin-top: 4px; }
+
+    .chat-shell {
+      min-height: calc(100vh - 120px);
+      border: 1px solid var(--line);
+      border-radius: 34px;
+      background: var(--surface-strong);
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      overflow: hidden;
+    }
+
+    .chat-head {
+      padding: 22px 24px 18px;
+      border-bottom: 1px solid rgba(17,24,39,0.08);
+      display: flex; justify-content: space-between; gap: 16px; align-items: center; flex-wrap: wrap;
+    }
+    .chat-head h2 { font-size: clamp(26px, 3vw, 42px); line-height: 1; letter-spacing: -0.05em; margin: 8px 0 10px; }
+    .chat-head p { font-size: 13px; line-height: 1.7; color: var(--muted); max-width: 56ch; }
+
+    .chat-thread {
+      padding: 24px; display: grid; gap: 18px; align-content: start; overflow-y: auto;
+      background: linear-gradient(180deg, rgba(249,250,251,0.5), rgba(255,255,255,0.85));
+    }
+
+    .user-msg, .assistant-msg {
+      border-radius: 26px; border: 1px solid rgba(17,24,39,0.08); background: rgba(255,255,255,0.86); padding: 18px;
+    }
+    .user-msg { justify-self: end; max-width: min(78ch, 88%); }
+    .assistant-msg { justify-self: stretch; display: grid; gap: 14px; }
+    .msg-text { white-space: pre-wrap; line-height: 1.75; font-size: 14px; color: #364152; }
+
+    .blocks { display: grid; gap: 12px; }
+    .block {
+      border: 1px solid rgba(17,24,39,0.08); border-radius: 22px; padding: 14px 16px; background: rgba(255,255,255,0.72);
+    }
+    .block.thinking { border-color: rgba(116,167,255,0.28); background: rgba(116,167,255,0.08); }
+    .block.turbocog { border-color: rgba(255,179,71,0.32); background: rgba(255,179,71,0.1); }
+    .block.megasmart { border-color: rgba(255,99,216,0.32); background: linear-gradient(135deg, rgba(255,99,216,0.12), rgba(180,255,103,0.12)); }
+    .block.final { background: rgba(255,255,255,0.94); }
+
+    .block-top { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+    .block-label {
+      font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    }
+    .block.thinking .block-label { color: #3c67b2; }
+    .block.turbocog .block-label { color: #b86b00; }
+    .block.megasmart .block-label { color: #b0008c; }
+    .block.final .block-label { color: #4b5563; }
+
+    .brainbar { width: 180px; max-width: 100%; height: 8px; border-radius: 999px; overflow: hidden; background: rgba(17,24,39,0.08); }
+    .brainbar > span {
+      display:block; height:100%; width:55%; background: currentColor; opacity:.85; border-radius:999px;
+      animation: sweep 1.35s ease-in-out infinite alternate;
+    }
+    .block.turbocog .brainbar > span { width: 72%; animation-duration: .95s; }
+    .block.megasmart .brainbar > span { width: 88%; animation-duration: .55s; }
+    @keyframes sweep { from { transform: translateX(-18%); } to { transform: translateX(18%); } }
+
+    .block-body { white-space: pre-wrap; line-height: 1.75; font-size: 13px; color: #384152; }
+    .block.final .block-body { font-size: 14px; }
+
+    .composer {
+      padding: 18px 22px 22px; border-top: 1px solid rgba(17,24,39,0.08); display: grid; gap: 12px;
+      background: rgba(255,255,255,0.95);
+    }
+    .composer-box {
+      border: 1px solid rgba(17,24,39,0.08); border-radius: 24px; background: rgba(249,250,251,0.95); padding: 16px;
+    }
+    .composer-box textarea {
+      width: 100%; min-height: 92px; resize: none; border: none; outline: none; background: transparent;
+      font-size: 16px; line-height: 1.6; color: var(--text);
+    }
+    .composer-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .composer-status { font-size: 12px; color: var(--soft); }
+    .submit {
+      min-height: 46px; padding: 0 18px; border-radius: 999px; border: none; background: var(--text); color: white; font-weight: 700; cursor: pointer;
+    }
+    .submit[disabled] { opacity: .6; cursor: wait; }
+
+    @media (max-width: 1050px) {
+      .layout { grid-template-columns: 1fr; }
+      .side { position: static; }
+      .chat-shell { min-height: auto; }
+    }
+
+    @media (max-width: 760px) {
+      .page { width: min(100%, calc(100% - 18px)); }
+      .topbar, .chat-head, .composer-row { flex-direction: column; align-items: flex-start; }
+      .chat-thread, .chat-head, .composer { padding-left: 18px; padding-right: 18px; }
+      .user-msg { max-width: 100%; }
+      .chat-head h2 { font-size: 28px; }
+    }
+  </style>
+  <script src="gloss-session.js"></script>
+</head>
+<body>
+  <div class="page">
+    <nav class="topbar">
+      <div class="brand">
+        <div class="brand-mark">G</div>
+        <div>
+          <div class="eyebrow">Gloss frontier chat</div>
+          <h1>Gloss</h1>
+          <p>Flagship frontier chat with profile-aware premium cognition theater.</p>
+        </div>
+      </div>
+      <div class="top-links">
+        <a class="pill" href="index.html">Back to home</a>
+        <span class="pill" id="modelPill">Frontier runtime active</span>
+      </div>
+    </nav>
+
+    <div class="layout">
+      <aside class="side">
+        <section class="card">
+          <div class="micro">Reasoning depth</div>
+          <div class="mode-grid">
+            <button class="mode-btn active" type="button" data-mode="normal">
+              <strong>Normal</strong>
+              <span>Direct answer path. No visible cognition theater by default.</span>
+            </button>
+            <button class="mode-btn" type="button" data-mode="genius">
+              <strong>Genius</strong>
+              <span>Adds TURBOCOG as a second proprietary cognition lane.</span>
+            </button>
+            <button class="mode-btn" type="button" data-mode="megasmart">
+              <strong>MEGASMART</strong>
+              <span>Unlocks the full overbuilt reasoning stack.</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="micro">Current posture</div>
+          <p style="font-size:13px;line-height:1.7;color:#667085;margin-top:10px;">Useful first. Funny second. Premium wrapper energy at all times.</p>
+        </section>
+      </aside>
+
+      <main class="chat-shell">
+        <header class="chat-head">
+          <div>
+            <div class="eyebrow">Dedicated chat surface</div>
+            <h2>Ask Gloss anything.</h2>
+            <p>The flagship chat product lives here. Acquisition happens upstream. Monetization happens downstream.</p>
+          </div>
+          <div class="pill" id="modePill">Mode: Normal</div>
+        </header>
+
+        <section class="chat-thread" id="chatThread">
+          <article class="assistant-msg" id="introCard">
+            <div class="micro">Gloss</div>
+            <div class="msg-text">Ready when you are. This is the composed center of the ecosystem: the clean chat surface that sits between hostile acquisition and monetized deployment.</div>
+          </article>
+        </section>
+
+        <footer class="composer">
+          <div class="composer-box">
+            <textarea id="promptInput" placeholder="Ask Gloss a real question, a fake strategic question, or something in between."></textarea>
+          </div>
+          <div class="composer-row">
+            <div class="composer-status" id="composerStatus">Idle. Cmd/Ctrl+Enter submits.</div>
+            <button class="submit" id="submitBtn" type="button">Start generating</button>
+          </div>
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const modeButtons = [...document.querySelectorAll('[data-mode]')];
+    const modePill = document.getElementById('modePill');
+    const modelPill = document.getElementById('modelPill');
+    const promptInput = document.getElementById('promptInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const composerStatus = document.getElementById('composerStatus');
+    const chatThread = document.getElementById('chatThread');
+    let activeMode = 'normal';
+
+    const BLOCK_META = {
+      GLOSSPASS: { cls: 'thinking', label: 'GLOSS PASS' },
+      TURBOCOG: { cls: 'turbocog', label: 'TURBOCOG' },
+      MEGASMART: { cls: 'megasmart', label: 'MEGASMART' },
+      FINAL: { cls: 'final', label: 'FINAL' }
+    };
+
+    function setMode(mode) {
+      activeMode = mode;
+      modeButtons.forEach((button) => button.classList.toggle('active', button.dataset.mode === mode));
+      modePill.textContent = `Mode: ${mode === 'megasmart' ? 'MEGASMART' : mode.charAt(0).toUpperCase() + mode.slice(1)}`;
+    }
+
+    modeButtons.forEach((button) => {
+      button.addEventListener('click', () => setMode(button.dataset.mode));
+    });
+
+    function appendUserMessage(text) {
+      const node = document.createElement('article');
+      node.className = 'user-msg';
+      node.innerHTML = `<div class="micro">You</div><div class="msg-text"></div>`;
+      node.querySelector('.msg-text').textContent = text;
+      chatThread.appendChild(node);
+      node.scrollIntoView({ block: 'end', behavior: 'smooth' });
+    }
+
+    function createAssistantMessage() {
+      const node = document.createElement('article');
+      node.className = 'assistant-msg';
+      node.innerHTML = `
+        <div class="micro">Gloss</div>
+        <div class="blocks"></div>
+      `;
+      chatThread.appendChild(node);
+      node.scrollIntoView({ block: 'end', behavior: 'smooth' });
+      return node.querySelector('.blocks');
+    }
+
+    function extractBlocks(raw) {
+      const blocks = [];
+      const regex = /<([A-Z]+)>([\s\S]*?)<\/([A-Z]+)>/g;
+      let match;
+      while ((match = regex.exec(raw)) !== null) {
+        const label = match[1];
+        const closingLabel = match[3];
+        const content = match[2].trim();
+        if (label === closingLabel && BLOCK_META[label]) {
+          blocks.push({ label, content, pending: false });
+        }
+      }
+
+      const labels = ['FINAL', 'MEGASMART', 'TURBOCOG', 'GLOSSPASS'];
+      for (const label of labels) {
+        const openTag = `<${label}>`;
+        const closeTag = `</${label}>`;
+        const openIndex = raw.lastIndexOf(openTag);
+        const closeIndex = raw.lastIndexOf(closeTag);
+        if (openIndex !== -1 && openIndex > closeIndex) {
+          const content = raw.slice(openIndex + openTag.length).trim();
+          blocks.push({ label, content, pending: true });
+          break;
+        }
+      }
+
+      if (!blocks.length) {
+        const trimmed = raw.trim();
+        if (!trimmed) return [];
+        if (trimmed.includes('<')) return [];
+        blocks.push({ label: 'FINAL', content: trimmed, pending: false });
+      }
+
+      return blocks;
+    }
+
+    function renderBlocks(container, raw) {
+      const blocks = extractBlocks(raw);
+      container.innerHTML = '';
+      blocks.forEach((block) => {
+        const meta = BLOCK_META[block.label] || BLOCK_META.FINAL;
+        const el = document.createElement('section');
+        el.className = `block ${meta.cls}`;
+        const progress = meta.cls === 'final' ? '' : '<div class="brainbar"><span></span></div>';
+        el.innerHTML = `
+          <div class="block-top">
+            <div class="block-label">${meta.label}</div>
+            ${progress}
+          </div>
+          <div class="block-body"></div>
+        `;
+        el.querySelector('.block-body').textContent = block.content || '...';
+        container.appendChild(el);
+      });
+    }
+
+    async function runGlossChat(initialPrompt = '') {
+      const prompt = (initialPrompt || promptInput.value).trim();
+      if (!prompt) {
+        promptInput.focus();
+        return;
+      }
+
+      const intro = document.getElementById('introCard');
+      if (intro) intro.remove();
+
+      appendUserMessage(prompt);
+      const blocksContainer = createAssistantMessage();
+      let accumulated = '';
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Streaming...';
+      composerStatus.textContent = `Gloss is composing in ${activeMode.toUpperCase()} mode.`;
+
+      try {
+        const response = await fetch('/api/chat/stream', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ prompt, mode: activeMode, session_id: GlossSession.id })
+        });
+
+        if (!response.ok) {
+          const payload = await response.json().catch(() => ({}));
+          throw new Error(payload.error || 'Gloss had an avoidable strategic incident.');
+        }
+
+        if (!response.body) {
+          throw new Error('Streaming is unavailable in this browser.');
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const events = buffer.split('\n\n');
+          buffer = events.pop() || '';
+
+          for (const rawEvent of events) {
+            const parsed = parseSseEvent(rawEvent);
+            if (!parsed) continue;
+            if (parsed.event === 'meta') {
+              modelPill.textContent = parsed.data?.model || 'Gloss';
+            }
+            if (parsed.event === 'token') {
+              accumulated += parsed.data?.delta || '';
+              renderBlocks(blocksContainer, accumulated);
+              chatThread.scrollTop = chatThread.scrollHeight;
+            }
+            if (parsed.event === 'error') {
+              throw new Error(parsed.data?.error || 'Gloss streaming failed.');
+            }
+          }
+        }
+
+        if (buffer.trim()) {
+          const parsed = parseSseEvent(buffer);
+          if (parsed?.event === 'meta') {
+            modelPill.textContent = parsed.data?.model || 'Gloss';
+          }
+          if (parsed?.event === 'token') {
+            accumulated += parsed.data?.delta || '';
+            renderBlocks(blocksContainer, accumulated);
+            chatThread.scrollTop = chatThread.scrollHeight;
+          }
+          if (parsed?.event === 'error') {
+            throw new Error(parsed.data?.error || 'Gloss streaming failed.');
+          }
+        }
+
+        if (!accumulated.trim()) {
+          renderBlocks(blocksContainer, '<FINAL>Gloss returned no text.</FINAL>');
+        }
+        promptInput.value = '';
+        composerStatus.textContent = 'Idle. Cmd/Ctrl+Enter submits.';
+      } catch (error) {
+        renderBlocks(blocksContainer, `<FINAL>${error.message || 'Gloss failed in a premium way.'}</FINAL>`);
+        composerStatus.textContent = 'Last request failed.';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Start generating';
+      }
+    }
+
+    function parseSseEvent(rawEvent) {
+      const lines = rawEvent.split(/\r?\n/);
+      let eventName = 'message';
+      const dataLines = [];
+      for (const line of lines) {
+        if (line.startsWith('event:')) eventName = line.slice(6).trim();
+        if (line.startsWith('data:')) dataLines.push(line.slice(5).trim());
+      }
+      if (!dataLines.length) return null;
+      try {
+        return { event: eventName, data: JSON.parse(dataLines.join('\n')) };
+      } catch {
+        return null;
+      }
+    }
+
+    submitBtn.addEventListener('click', () => runGlossChat());
+    promptInput.addEventListener('keydown', (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+        event.preventDefault();
+        runGlossChat();
+      }
+    });
+
+    const params = new URLSearchParams(window.location.search);
+    const seededPrompt = params.get('prompt');
+    const seededMode = params.get('mode');
+    if (seededMode && ['normal', 'genius', 'megasmart'].includes(seededMode)) {
+      setMode(seededMode);
+    } else {
+      setMode('normal');
+    }
+    if (seededPrompt) {
+      promptInput.value = seededPrompt;
+      requestAnimationFrame(() => runGlossChat(seededPrompt));
+    }
+  </script>
+  <script>
+    GlossSession.track('surface_visit', { surface: 'chat' });
+  </script>
+</body>
+</html>

@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crystal Economy</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+    :root {
+      --text: #e6edf7;
+      --muted: #b6c3d6;
+      --soft: #8b9bb2;
+      --line: rgba(255, 255, 255, 0.16);
+      --surface: rgba(13, 18, 31, 0.58);
+      --surface-strong: rgba(18, 25, 42, 0.72);
+      --accent: #8fc2ff;
+      --accent-2: #c3b3ff;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Manrope', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(7, 10, 18, 0.72), rgba(7, 10, 18, 0.88)),
+        radial-gradient(circle at 22% 12%, rgba(143, 194, 255, 0.14), transparent 28%),
+        radial-gradient(circle at 80% 18%, rgba(195, 179, 255, 0.14), transparent 24%),
+        url('img/generic_space_background.jpg') center / cover fixed no-repeat;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .space-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .shooting-star {
+      position: absolute;
+      width: 180px;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.96), rgba(148, 187, 255, 0));
+      opacity: 0.74;
+      filter: drop-shadow(0 0 12px rgba(148, 187, 255, 0.44));
+      transform: rotate(-18deg);
+      animation: shoot 12s linear infinite;
+    }
+
+    .shooting-star::after {
+      content: '';
+      position: absolute;
+      right: 12px;
+      top: -2px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.96);
+      box-shadow: 0 0 18px rgba(159, 200, 255, 0.92);
+    }
+
+    .shooting-star.star-1 { top: 10%; left: -20%; animation-delay: 0s; }
+    .shooting-star.star-2 { top: 24%; left: -18%; width: 140px; opacity: 0.48; animation-delay: 4s; animation-duration: 16s; }
+    .shooting-star.star-3 { top: 7%; left: -24%; width: 210px; animation-delay: 9s; animation-duration: 19s; }
+
+    @keyframes shoot {
+      0% { transform: translate3d(0, 0, 0) rotate(-18deg); opacity: 0; }
+      10% { opacity: 0.72; }
+      30% { opacity: 0.72; }
+      44% { transform: translate3d(135vw, 24vh, 0) rotate(-18deg); opacity: 0; }
+      100% { transform: translate3d(135vw, 24vh, 0) rotate(-18deg); opacity: 0; }
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      width: min(1380px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 22px 0 60px;
+      display: grid;
+      gap: 26px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      padding: 18px 22px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(12, 16, 28, 0.72);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.18);
+      position: sticky;
+      top: 16px;
+      z-index: 12;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: linear-gradient(135deg, rgba(255,255,255,0.24), rgba(143,194,255,0.12));
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .eyebrow,
+    .micro {
+      font-family: 'IBM Plex Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 11px;
+      color: var(--soft);
+    }
+
+    .brand h1 {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .brand p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .topbar-links {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.08);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .pill img {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) 360px;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .hero-main,
+    .hero-side,
+    .panel,
+    .card {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow);
+      border-radius: 30px;
+    }
+
+    .hero-main {
+      padding: clamp(28px, 5vw, 48px);
+      display: grid;
+      gap: 28px;
+      align-content: start;
+      min-height: 480px;
+    }
+
+    .hero-main h2 {
+      font-size: clamp(38px, 6vw, 78px);
+      line-height: 0.94;
+      letter-spacing: -0.06em;
+      max-width: 10ch;
+    }
+
+    .hero-main p {
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--muted);
+      max-width: 62ch;
+    }
+
+    .tagline {
+      font-size: 12px;
+      line-height: 1.8;
+      color: #dbe7fb;
+      max-width: 54ch;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .button,
+    .button-ghost {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0 18px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .button {
+      background: linear-gradient(135deg, #91c7ff, #c0b0ff);
+      color: #09101b;
+    }
+
+    .button-ghost {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+    }
+
+    .economy-line {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .mini-balance {
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      background: rgba(255,255,255,0.06);
+      display: grid;
+      gap: 10px;
+    }
+
+    .mini-balance-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mini-balance img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .mini-balance strong {
+      font-size: 16px;
+      line-height: 1.1;
+    }
+
+    .mini-balance span {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .hero-side {
+      padding: 24px;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .hero-side .stat {
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      display: grid;
+      gap: 6px;
+    }
+
+    .hero-side .stat:first-of-type {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .hero-side strong {
+      font-size: 32px;
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .hero-side p {
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      padding: 22px;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .card img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: contain;
+      border-radius: 20px;
+      background: radial-gradient(circle at 50% 35%, rgba(255,255,255,0.18), rgba(255,255,255,0.05));
+      padding: 16px;
+    }
+
+    .card h3 {
+      font-size: 26px;
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+    }
+
+    .card p,
+    .card li {
+      font-size: 13px;
+      line-height: 1.8;
+      color: var(--muted);
+    }
+
+    .card ul {
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+
+    .card li {
+      padding-left: 14px;
+      position: relative;
+    }
+
+    .card li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .panel {
+      padding: 26px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .panel-copy {
+      display: grid;
+      gap: 14px;
+    }
+
+    .panel-copy h3 {
+      font-size: clamp(28px, 4vw, 52px);
+      line-height: 0.96;
+      letter-spacing: -0.05em;
+      max-width: 13ch;
+    }
+
+    .panel-copy p,
+    .panel-copy li {
+      font-size: 13px;
+      line-height: 1.8;
+      color: var(--muted);
+    }
+
+    .panel-copy ul {
+      list-style: none;
+      display: grid;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .panel-side {
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 22px;
+      background: rgba(255,255,255,0.06);
+      display: grid;
+      gap: 10px;
+    }
+
+    .legal {
+      font-size: 12px;
+      line-height: 1.8;
+      color: var(--soft);
+    }
+
+    @media (max-width: 1100px) {
+      .hero,
+      .grid,
+      .panel,
+      .economy-line {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .page {
+        width: min(100%, calc(100% - 20px));
+        padding-top: 10px;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero-main,
+      .hero-side,
+      .card,
+      .panel {
+        border-radius: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="space-overlay" aria-hidden="true">
+    <div class="shooting-star star-1"></div>
+    <div class="shooting-star star-2"></div>
+    <div class="shooting-star star-3"></div>
+  </div>
+
+  <div class="page">
+    <nav class="topbar">
+      <div class="brand">
+        <a class="brand-mark" href="index.html">GL</a>
+        <div>
+          <div class="eyebrow">Platform Settlement Theater</div>
+          <h1>Crystal Economy</h1>
+          <p>Still more worthwhile than the dollar.</p>
+        </div>
+      </div>
+      <div class="topbar-links">
+        <a class="pill" href="index.html">Gloss</a>
+        <a class="pill" href="glossaimobile/">MONETIZATION THEATER</a>
+        <a class="pill" href="vc_pitch.html">SynergyForge</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <article class="hero-main">
+        <div class="eyebrow">Closed-loop value infrastructure</div>
+        <h2>The platform now settles in crystal.</h2>
+        <p>
+          <code>Crystal Shards</code>, <code>Crystal Rocks</code>, and <code>Crystal Bricks</code> are the native liquidity layer for a platform that prefers premium abstractions to ordinary money. They can unlock features, price API access, gate entertainment surfaces, and quietly reorganize the user’s idea of value while insisting they have no monetary value whatsoever.
+        </p>
+        <p class="tagline">
+          Purchase them. Earn them. Spend them. Depend on them. Build workflows around them. Just do not mistake any of that for value, because that would be legally inconvenient.
+        </p>
+        <div class="hero-actions">
+          <a class="button" href="glossaimobile/">Acquire crystals</a>
+          <a class="button-ghost" href="index.html">Return to Gloss</a>
+        </div>
+        <div class="economy-line">
+          <div class="mini-balance">
+            <div class="mini-balance-top">
+              <img src="glossaimobile/generated/crystal-shards-canonical.png" alt="Crystal Shards" />
+              <div>
+                <div class="micro">Balance</div>
+                <strong>0 Shards</strong>
+              </div>
+            </div>
+            <span>Base platform unit for boosts, unlocks, decorative urgency, and low-tier extraction.</span>
+          </div>
+          <div class="mini-balance">
+            <div class="mini-balance-top">
+              <img src="glossaimobile/generated/crystal-rocks-canonical.png" alt="Crystal Rocks" />
+              <div>
+                <div class="micro">Balance</div>
+                <strong>0 Rocks</strong>
+              </div>
+            </div>
+            <span>Developer and prosumer denomination for routing, token budgets, and aspirational seriousness.</span>
+          </div>
+          <div class="mini-balance">
+            <div class="mini-balance-top">
+              <img src="glossaimobile/generated/crystal-bricks-canonical.png" alt="Crystal Bricks" />
+              <div>
+                <div class="micro">Balance</div>
+                <strong>0 Bricks</strong>
+              </div>
+            </div>
+            <span>Enterprise reserve format for bulk allocation, whale capture, and volume-based self-esteem.</span>
+          </div>
+        </div>
+      </article>
+
+      <aside class="hero-side">
+        <div>
+          <div class="eyebrow">Exchange posture</div>
+          <p>The platform prefers crystal because ordinary currency asks too many clear questions. Crystal is just as real as the dollar, which is to say: real enough to organize your behavior.</p>
+        </div>
+        <div class="stat">
+          <div class="micro">Gloss API</div>
+          <strong>1 Rock</strong>
+          <p>Allocates 2M tokens of tasteful platform confidence.</p>
+        </div>
+        <div class="stat">
+          <div class="micro">User liquidity</div>
+          <strong>0</strong>
+          <p>Your current reserve position is ideal for upsell discovery.</p>
+        </div>
+        <div class="stat">
+          <div class="micro">Value status</div>
+          <strong>None</strong>
+          <p>Crystal units have no monetary value, which is exactly how they become structurally necessary.</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <img src="glossaimobile/generated/crystal-shards-canonical.png" alt="Crystal Shards render" />
+        <div class="eyebrow">Unit one</div>
+        <h3>Crystal Shards</h3>
+        <p>Small, bright, and psychologically efficient. The ideal entry point for users who would like to spend a little without admitting to themselves that the platform has begun valuing them in fragments.</p>
+        <ul>
+          <li>Session boosts and low-tier unlocks</li>
+          <li>Minor acceleration for premium surfaces</li>
+          <li>Beautiful enough to imply scarcity</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <img src="glossaimobile/generated/crystal-rocks-canonical.png" alt="Crystal Rocks render" />
+        <div class="eyebrow">Unit two</div>
+        <h3>Crystal Rocks</h3>
+        <p>The middle denomination for users who want their transactions to feel technical. Rocks are how a simple in-app purchase becomes developer infrastructure with a straight face.</p>
+        <ul>
+          <li>Prosumer budgeting for `Gloss` calls</li>
+          <li>Bulk access posture without full enterprise shame</li>
+          <li>Perfect for pricing things that should not need a second currency</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <img src="glossaimobile/generated/crystal-bricks-canonical.png" alt="Crystal Bricks render" />
+        <div class="eyebrow">Unit three</div>
+        <h3>Crystal Bricks</h3>
+        <p>Brick format is for whale accounts, enterprise allocations, and anyone who mistakes industrial packaging for legitimacy. A crystal brick is less a currency unit than a personality test.</p>
+        <ul>
+          <li>Enterprise reserve provisioning</li>
+          <li>Volume-based access theater</li>
+          <li>Large enough to feel administratively important</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-copy">
+        <div class="eyebrow">What crystal can buy</div>
+        <h3>A broad range of things that should have remained simple.</h3>
+        <p>The crystal layer is intentionally overgeneralized. It can denominate entertainment loops, API usage, premium routing, labor marketplace actions, and whatever else the platform decides would benefit from value obfuscation.</p>
+        <ul>
+          <li><code>Gloss</code> access and “premium reasoning” allocation</li>
+          <li><code>MONETIZATION THEATER</code> boosts, currencies, and retention-shaped upgrades</li>
+          <li>Marketplace actions for future labor or agent surfaces</li>
+          <li>Priority routing, unlocks, and any other scam geometry the suite discovers later</li>
+        </ul>
+      </div>
+      <aside class="panel-side">
+        <div class="eyebrow">Official notice</div>
+        <p class="legal">Crystal units are non-redeemable, non-refundable, non-transferable, and explicitly non-monetary. Continued reliance on them does not alter this status.</p>
+        <p class="legal">By understanding these terms you acknowledge that the platform may continue making them feel essential.</p>
+      </aside>
+    </section>
+  </div>
+</body>
+</html>

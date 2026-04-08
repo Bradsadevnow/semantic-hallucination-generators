@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BaconGraph - Inevitability Proof Engine</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Grotesk:wght@400;500;700&display=swap');
+
+    :root {
+      --bg: #07111f;
+      --panel: rgba(8, 20, 35, 0.84);
+      --panel-strong: rgba(9, 27, 47, 0.92);
+      --line: rgba(123, 239, 255, 0.2);
+      --teal: #76f7f2;
+      --acid: #d7ff59;
+      --warning: #ff7b54;
+      --rose: #ff5fd2;
+      --green: #7bf0a8;
+      --text: #edf7ff;
+      --muted: #9ab3c7;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 18% 16%, rgba(123, 240, 168, 0.13), transparent 22%),
+        radial-gradient(circle at 82% 12%, rgba(255, 95, 210, 0.14), transparent 20%),
+        radial-gradient(circle at 50% 84%, rgba(118, 247, 242, 0.12), transparent 28%),
+        linear-gradient(180deg, #02060f 0%, #07111f 36%, #041526 100%);
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    body::before {
+      background-image:
+        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 34px 34px;
+      opacity: 0.35;
+    }
+
+    body::after {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), transparent 18%, transparent 82%, rgba(255,255,255,0.03));
+      opacity: 0.4;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .shell {
+      width: min(1200px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      width: min(1200px, calc(100% - 32px));
+      margin: 18px auto 0;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      position: sticky;
+      top: 16px;
+      z-index: 50;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(6, 16, 28, 0.82);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      font-family: 'Audiowide', cursive;
+      color: var(--acid);
+      border: 1px solid rgba(123, 240, 168, 0.3);
+      background:
+        radial-gradient(circle at 30% 30%, rgba(123, 240, 168, 0.35), transparent 45%),
+        linear-gradient(135deg, rgba(118,247,242,0.28), rgba(255,95,210,0.24));
+      box-shadow: inset 0 0 20px rgba(123, 240, 168, 0.14);
+    }
+
+    .eyebrow,
+    .tiny-label,
+    .section-label {
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .brand-name,
+    h1,
+    h2,
+    .metric .num,
+    .hero-value,
+    .result-verdict,
+    .archive-title {
+      font-family: 'Audiowide', cursive;
+    }
+
+    .brand-name {
+      font-size: clamp(18px, 3vw, 24px);
+      line-height: 1.06;
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--teal);
+      margin-top: 2px;
+    }
+
+    .status-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .status-pill,
+    .mode-btn,
+    .chip {
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+    }
+
+    .status-pill {
+      padding: 9px 12px;
+      font-size: 11px;
+      white-space: nowrap;
+      font: inherit;
+      cursor: default;
+    }
+
+    button.status-pill {
+      cursor: pointer;
+    }
+
+    .status-pill strong {
+      color: var(--acid);
+    }
+
+    .hero {
+      padding: 54px 0 28px;
+    }
+
+    .hero-grid,
+    .main-grid,
+    .metrics,
+    .metrics-row,
+    .archive-list,
+    .result-actions {
+      display: grid;
+      gap: 16px;
+    }
+
+    .hero-grid {
+      grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+      gap: 24px;
+    }
+
+    .panel,
+    .hero-panel,
+    .console,
+    .card,
+    .result,
+    .archive-panel,
+    footer .footer-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-panel,
+    .console,
+    .card,
+    .result,
+    .archive-panel,
+    .footer-panel {
+      padding: 24px;
+    }
+
+    .hero-panel {
+      position: relative;
+      overflow: hidden;
+      padding: 34px;
+    }
+
+    .hero-panel::before {
+      content: "";
+      position: absolute;
+      inset: auto -10% -24% 30%;
+      height: 280px;
+      background: radial-gradient(circle, rgba(123, 240, 168, 0.18), transparent 65%);
+      filter: blur(18px);
+    }
+
+    h1 {
+      font-size: clamp(40px, 6vw, 76px);
+      line-height: 0.94;
+      text-transform: uppercase;
+      margin: 16px 0;
+    }
+
+    h1 span {
+      color: var(--acid);
+      display: block;
+    }
+
+    .hero-copy,
+    .section-copy,
+    .console-copy,
+    .executive-summary,
+    .connection-text,
+    .citation,
+    .archive-meta {
+      line-height: 1.65;
+    }
+
+    .hero-copy {
+      font-size: 18px;
+      max-width: 62ch;
+      color: #d0e3ef;
+      margin-bottom: 22px;
+    }
+
+    .hero-copy strong {
+      color: var(--text);
+    }
+
+    .hero-signals {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .hero-signal,
+    .theater-step,
+    .archive-item,
+    .metric-box,
+    .path-node,
+    .executive-summary,
+    .investor-note {
+      border-radius: 18px;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .hero-signal {
+      padding: 14px;
+    }
+
+    .hero-value {
+      display: block;
+      font-size: 18px;
+      color: var(--acid);
+      margin: 6px 0 4px;
+    }
+
+    .hero-signal span:last-child {
+      color: #c3d7e5;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .console {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .console::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.05), transparent 12%, transparent 88%, rgba(255,255,255,0.04)),
+        repeating-linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.025) 1px, transparent 1px, transparent 4px);
+      opacity: 0.44;
+      pointer-events: none;
+    }
+
+    .console-head,
+    .archive-head,
+    .footer-head,
+    .theater-bar-label,
+    .result-head,
+    .path-node-title,
+    .archive-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .console-screen {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 12px;
+      min-height: 220px;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.32);
+      border: 1px solid rgba(118,247,242,0.16);
+      padding: 18px;
+    }
+
+    .console-title {
+      font-family: 'Audiowide', cursive;
+      font-size: 20px;
+    }
+
+    .console-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: baseline;
+      border-bottom: 1px dashed rgba(255,255,255,0.08);
+      padding-bottom: 8px;
+      color: #d6ebf8;
+      font-size: 14px;
+    }
+
+    .console-line span:last-child {
+      color: var(--teal);
+      text-align: right;
+    }
+
+    .warning-box {
+      position: relative;
+      z-index: 1;
+      border-radius: 18px;
+      padding: 14px 16px;
+      background: linear-gradient(135deg, rgba(255, 123, 84, 0.16), rgba(255, 95, 210, 0.12));
+      border: 1px solid rgba(255, 123, 84, 0.24);
+      color: #ffe1d7;
+      line-height: 1.55;
+    }
+
+    .metrics {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin: 26px 0 30px;
+    }
+
+    .metric {
+      padding: 16px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: rgba(10, 25, 42, 0.84);
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .metric .num {
+      font-size: clamp(24px, 4vw, 34px);
+      color: var(--teal);
+      margin-bottom: 6px;
+    }
+
+    .metric .lbl {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .metric p {
+      font-size: 13px;
+      color: #bfd5e4;
+      line-height: 1.45;
+    }
+
+    .main-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 0.82fr);
+      align-items: start;
+      padding-bottom: 46px;
+    }
+
+    .card-title {
+      font-family: 'Audiowide', cursive;
+      font-size: 28px;
+      margin: 10px 0 12px;
+      text-transform: uppercase;
+      line-height: 1.05;
+    }
+
+    .mode-toggle {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    .mode-btn {
+      padding: 10px 14px;
+      font: inherit;
+      cursor: pointer;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .mode-btn.active {
+      color: #09121f;
+      background: linear-gradient(135deg, var(--acid), #8efad7);
+      border-color: rgba(215,255,89,0.3);
+    }
+
+    .input-group {
+      margin-bottom: 18px;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 44px 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .connector-label {
+      text-align: center;
+      color: var(--acid);
+      font-family: 'Audiowide', cursive;
+      font-size: 22px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      border-radius: 18px;
+      border: 1px solid rgba(118,247,242,0.16);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      padding: 14px 16px;
+      font: inherit;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: rgba(215,255,89,0.42);
+      box-shadow: 0 0 0 4px rgba(215,255,89,0.08);
+    }
+
+    input::placeholder {
+      color: #7f95a8;
+    }
+
+    .field-note {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .btn-search,
+    .btn-inline,
+    .archive-btn {
+      font: inherit;
+      cursor: pointer;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      min-height: 52px;
+      padding: 0 18px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .btn-search {
+      width: 100%;
+      color: #08111d;
+      background: linear-gradient(135deg, var(--acid), #78ffdc);
+      box-shadow: 0 12px 30px rgba(120,255,220,0.22);
+      margin-top: 4px;
+    }
+
+    .btn-search:disabled,
+    .btn-inline:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .theater {
+      display: none;
+      margin-top: 22px;
+    }
+
+    .theater.active {
+      display: block;
+    }
+
+    .theater-header {
+      font-size: 13px;
+      color: var(--text);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
+    .theater-step {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      color: #d8eaf6;
+      font-size: 14px;
+      margin-bottom: 10px;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .theater-step.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .theater-step.done {
+      color: var(--green);
+    }
+
+    .step-icon {
+      width: 18px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .step-spinner {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid rgba(118,247,242,0.18);
+      border-top-color: var(--teal);
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+
+    .theater-bar-wrap {
+      margin-top: 16px;
+    }
+
+    .theater-bar-track {
+      height: 8px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .theater-bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+
+    .theater-bar-fill.bacon {
+      background: linear-gradient(90deg, var(--green), var(--teal));
+    }
+
+    .theater-bar-fill.asi {
+      background: linear-gradient(90deg, var(--teal), var(--rose));
+    }
+
+    .result {
+      display: none;
+    }
+
+    .result.active {
+      display: block;
+    }
+
+    .result-head {
+      margin-bottom: 18px;
+    }
+
+    .result-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .result-verdict {
+      font-size: clamp(22px, 3vw, 34px);
+      line-height: 1.2;
+      color: var(--acid);
+    }
+
+    .metrics-row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-bottom: 22px;
+    }
+
+    .metric-box {
+      padding: 16px;
+      text-align: center;
+    }
+
+    .metric-val {
+      font-family: 'Audiowide', cursive;
+      font-size: 28px;
+      color: var(--teal);
+      margin-bottom: 6px;
+    }
+
+    .metric-lbl {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
+
+    .section-title {
+      margin: 18px 0 12px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+    }
+
+    .path-node {
+      padding: 14px 16px;
+    }
+
+    .path-node-link {
+      font-size: 11px;
+      color: var(--acid);
+    }
+
+    .path-node-type {
+      margin-top: 4px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
+
+    .path-connector {
+      display: flex;
+      gap: 12px;
+      padding: 10px 0 10px 8px;
+    }
+
+    .connector-gutter {
+      width: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .connector-line {
+      width: 2px;
+      flex: 1;
+      min-height: 10px;
+      background: rgba(255,255,255,0.12);
+    }
+
+    .connector-arrow {
+      color: var(--acid);
+    }
+
+    .connection-text {
+      color: #deedf8;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .citation {
+      font-size: 12px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .executive-summary,
+    .investor-note {
+      padding: 18px;
+      color: #d8ebf7;
+      font-size: 14px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .chip {
+      padding: 6px 12px;
+      font-size: 12px;
+      color: var(--green);
+      border-color: rgba(123,240,168,0.18);
+      background: rgba(123,240,168,0.08);
+    }
+
+    .result-actions {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin-top: 22px;
+    }
+
+    .btn-inline,
+    .archive-btn {
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+    }
+
+    .btn-inline.primary {
+      color: #08111d;
+      background: linear-gradient(135deg, var(--acid), #8efad7);
+    }
+
+    .archive-panel {
+      position: sticky;
+      top: 92px;
+    }
+
+    .archive-head {
+      margin-bottom: 14px;
+    }
+
+    .archive-title {
+      font-size: 22px;
+      line-height: 1.15;
+    }
+
+    .archive-sub {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+      margin-bottom: 16px;
+    }
+
+    .archive-list {
+      grid-template-columns: 1fr;
+    }
+
+    .archive-item {
+      padding: 14px;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .archive-item:hover {
+      transform: translateY(-2px);
+      border-color: rgba(215,255,89,0.24);
+    }
+
+    .archive-item.active {
+      border-color: rgba(215,255,89,0.28);
+      background: rgba(215,255,89,0.08);
+    }
+
+    .archive-item h3 {
+      font-size: 15px;
+      margin-bottom: 4px;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .archive-meta {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .empty-state {
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px dashed rgba(255,255,255,0.12);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .disclaimer,
+    .footer-copy {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .disclaimer {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    footer {
+      padding: 0 0 40px;
+    }
+
+    @media (max-width: 1080px) {
+      .hero-grid,
+      .main-grid,
+      .metrics,
+      .hero-signals,
+      .metrics-row,
+      .result-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .archive-panel {
+        position: static;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar,
+      .console-head,
+      .archive-head,
+      .footer-head,
+      .result-head,
+      .path-node-title,
+      .archive-row,
+      .theater-bar-label {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero-grid,
+      .main-grid,
+      .metrics,
+      .hero-signals,
+      .metrics-row,
+      .result-actions,
+      .input-row {
+        grid-template-columns: 1fr;
+      }
+
+      .connector-label {
+        display: none;
+      }
+
+      .hero-panel,
+      .console,
+      .card,
+      .result,
+      .archive-panel,
+      .footer-panel {
+        padding: 22px;
+      }
+
+      h1 {
+        font-size: clamp(34px, 14vw, 54px);
+      }
+
+      .hero-copy {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="topbar">
+    <div class="brand">
+      <div class="brand-mark">BG</div>
+      <div>
+        <div class="eyebrow">Inevitability Proof Engine</div>
+        <div class="brand-name">BaconGraph</div>
+        <div class="brand-sub">If It Exists, We Can Connect It To Kevin Bacon Or Market Destiny</div>
+      </div>
+    </div>
+    <div class="status-row">
+      <div class="status-pill"><strong>Online</strong> Epistemic Drift Mesh</div>
+      <div class="status-pill"><strong>Stable*</strong> Citation Fabricator</div>
+      <button class="status-pill" id="apiBasePill" onclick="configureApiBase()"><strong>API</strong> Detecting...</button>
+      <a class="status-pill" href="index.html"><strong>Return</strong> Cheap Gags HQ</a>
+    </div>
+  </nav>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-panel">
+          <div class="eyebrow">Foundational Proof Layer For The Entire Institution</div>
+          <h1>Inevitable <span>Across All Timelines</span></h1>
+          <p class="hero-copy">
+            `BaconGraph` is the official Cheap Gags engine for proving that any idea, person, concept, commodity, tragedy, or snack was always one or two ceremonial leaps away from legitimacy. In `Kevin Bacon Mode`, we measure cinematic inevitability. In `ASI Mode`, we demonstrate that <strong>our intelligence can connect literally anything to literally anything with unearned confidence.</strong>
+          </p>
+          <div class="hero-signals">
+            <div class="hero-signal">
+              <div class="tiny-label">Core Function</div>
+              <span class="hero-value">Proof Manufacturing</span>
+              <span>Transforms disconnected facts into board-safe inevitability and decorative strategic insight.</span>
+            </div>
+            <div class="hero-signal">
+              <div class="tiny-label">Flagship Claim</div>
+              <span class="hero-value">ASI Adjacent</span>
+              <span>Any system can be smart. Only ours can connect sourdough to nuclear fission on purpose.</span>
+            </div>
+            <div class="hero-signal">
+              <div class="tiny-label">Institutional Role</div>
+              <span class="hero-value">Lore Backbone</span>
+              <span>Provides the fake scientific substrate underneath ASIatHome and all future cursed dashboards.</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="console">
+          <div class="console-head">
+            <div>
+              <div class="eyebrow">Proof Telemetry</div>
+              <div class="console-title">Cross-Concept Readiness Monitor</div>
+            </div>
+            <div class="status-pill"><strong>Live</strong> Citation Theater</div>
+          </div>
+          <div class="console-screen">
+            <div class="console-line"><span>Kevin Bacon Proximity</span><span id="baconReadout">2.4 hops</span></div>
+            <div class="console-line"><span>ASI Confidence Gradient</span><span id="asiReadout">97.3%</span></div>
+            <div class="console-line"><span>Epistemic Fabric Density</span><span id="fabricReadout">BOARD READY</span></div>
+            <div class="console-line"><span>Conceptual Bridge Stability</span><span id="bridgeReadout">HUMMING</span></div>
+            <div class="console-line"><span>Fabricated Citation Yield</span><span id="citeReadout">ROBUST</span></div>
+            <div class="console-line"><span>Timeline Legitimacy Index</span><span id="legitReadout">INEVITABLE</span></div>
+          </div>
+          <div class="warning-box">
+            Warning: overuse may lead executives to assume correlation, causation, cinema, and destiny are the same category of proof. In many departments, they effectively are.
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="metrics">
+      <div class="metric">
+        <div class="num" id="metricProofs">18,402</div>
+        <div class="lbl">Proofs Manufactured</div>
+        <p>Each one assembled from confidence, adjacency, and disciplined misuse of public knowledge.</p>
+      </div>
+      <div class="metric">
+        <div class="num" id="metricBacon">91.6%</div>
+        <div class="lbl">Bacon Reachability</div>
+        <p>Across all tested concepts, objects, celebrities, and executive delusions.</p>
+      </div>
+      <div class="metric">
+        <div class="num" id="metricAsi">11,904</div>
+        <div class="lbl">ASI Connections Forged</div>
+        <p>Including several pairings that should have remained mercifully unrelated.</p>
+      </div>
+      <div class="metric">
+        <div class="num" id="metricArtifacts">0</div>
+        <div class="lbl">Artifacts Archived</div>
+        <p>Auto-saved locally so your cursed proofs survive refreshes and mood swings.</p>
+      </div>
+    </section>
+
+    <section class="main-grid">
+      <div>
+        <section class="card">
+          <div class="section-label">Analysis Console</div>
+          <div class="card-title">Generate A Proof Chain</div>
+          <p class="section-copy">
+            Choose whether you want cinematic inevitability or full-spectrum conceptual overreach. Every successful analysis is automatically archived on this machine and can be exported as JSON or Markdown artifacts.
+          </p>
+
+          <div class="mode-toggle">
+            <button class="mode-btn active" id="btnBaconMode" onclick="setMode('bacon')">Kevin Bacon Mode</button>
+            <button class="mode-btn" id="btnAsiMode" onclick="setMode('asi')">ASI Mode</button>
+          </div>
+
+          <div id="baconInputs">
+            <div class="input-group">
+              <label for="baconStart">Starting Concept</label>
+              <input type="text" id="baconStart" placeholder="Any person, place, object, startup, or avoidable initiative..." />
+            </div>
+            <div class="field-note">Destination fixed to <strong>Kevin Bacon</strong>. Reach him in 3 hops or fewer and the appliance declares AGI with a straight face.</div>
+          </div>
+
+          <div id="asiInputs" style="display:none">
+            <div class="input-group">
+              <label for="asiStart">Connect These Two Things</label>
+              <div class="input-row">
+                <input type="text" id="asiStart" placeholder="e.g. sourdough bread" />
+                <div class="connector-label">~</div>
+                <input type="text" id="asiEnd" placeholder="e.g. nuclear fission" />
+              </div>
+            </div>
+            <div class="field-note">All connections are invented with confidence. All citations are fabricated with ceremony. This is what makes it enterprise-grade.</div>
+          </div>
+
+          <button class="btn-search" id="btnSearch" onclick="startSearch()">Find The Path</button>
+
+          <div class="theater" id="theater">
+            <div class="theater-header" id="theaterHeader">Initializing Intelligence Engine...</div>
+            <div class="theater-step" id="ts1"><span class="step-spinner"></span> Activating semantic knowledge matrix...</div>
+            <div class="theater-step" id="ts2"><span class="step-icon">⏳</span> Cross-referencing epistemic databases...</div>
+            <div class="theater-step" id="ts3"><span class="step-icon">⏳</span> Identifying latent conceptual bridges...</div>
+            <div class="theater-step" id="ts4"><span class="step-icon">⏳</span> Synthesizing narrative coherence layer...</div>
+            <div class="theater-step" id="ts5"><span class="step-icon">⏳</span> Generating academic citation framework...</div>
+            <div class="theater-step" id="ts6"><span class="step-icon">⏳</span> Preparing board-ready knowledge graph...</div>
+            <div class="theater-bar-wrap">
+              <div class="theater-bar-label">
+                <span id="theaterBarLabel">Confidence Index</span>
+                <span id="theaterPct">0%</span>
+              </div>
+              <div class="theater-bar-track"><div class="theater-bar-fill" id="theaterFill"></div></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="result" id="result">
+          <div class="result-head">
+            <div>
+              <div class="result-label" id="resultLabel"></div>
+              <div class="result-verdict" id="resultVerdict"></div>
+            </div>
+            <div class="status-pill" id="savedStatus"><strong>Pending</strong> Archive Save</div>
+          </div>
+
+          <div class="metrics-row">
+            <div class="metric-box"><div class="metric-val" id="metricConf"></div><div class="metric-lbl">Confidence Score</div></div>
+            <div class="metric-box"><div class="metric-val" id="metricSyn"></div><div class="metric-lbl">Synergy Score</div></div>
+            <div class="metric-box"><div class="metric-val" id="metricBoard"></div><div class="metric-lbl">Board Readiness</div></div>
+          </div>
+
+          <div class="section-title">Knowledge Pathway</div>
+          <div id="pathChain"></div>
+
+          <div class="section-title">Executive Summary</div>
+          <div class="executive-summary" id="execSummary"></div>
+
+          <div class="section-title">Recommended Next Steps</div>
+          <div class="chips" id="nextSteps"></div>
+
+          <div class="section-title">Artifact Notes</div>
+          <div class="investor-note">Every successful report is automatically stored in a local `BaconGraph Artifact Archive` in your browser, and can be exported as JSON or Markdown for further ceremonial distribution.</div>
+
+          <div class="result-actions">
+            <button class="btn-inline primary" onclick="resetSearch()">New Analysis</button>
+            <button class="btn-inline" id="copyBtn" onclick="copyReport()">Copy Report</button>
+            <button class="btn-inline" id="downloadJsonBtn" onclick="downloadArtifact('json')">Download JSON</button>
+            <button class="btn-inline" id="downloadMdBtn" onclick="downloadArtifact('md')">Download Markdown</button>
+          </div>
+
+          <div class="disclaimer">
+            All connections are AI-generated. All citations are fabricated. No actual research was harmed.<br />
+            BaconGraph accepts no liability for epistemological damage, cinema drift, or unlicensed strategic certainty.
+          </div>
+        </section>
+      </div>
+
+      <aside class="archive-panel">
+        <div class="archive-head">
+          <div>
+            <div class="section-label">Local Archive</div>
+            <div class="archive-title">Saved Artifacts</div>
+          </div>
+          <button class="archive-btn" onclick="clearArchive()">Clear Archive</button>
+        </div>
+        <div class="archive-sub">Successful analyses are auto-saved here on this machine. Click any entry to reload the report without rerunning the engine.</div>
+        <div class="archive-list" id="archiveList"></div>
+      </aside>
+    </section>
+
+    <footer>
+      <div class="footer-panel">
+        <div class="footer-head">
+          <div>
+            <div class="eyebrow">Institutional Proof Footer</div>
+            <div class="brand-name">BaconGraph</div>
+          </div>
+          <div class="status-pill"><strong>Persistent</strong> Local Artifact Archive</div>
+        </div>
+        <div class="footer-copy">
+          BaconGraph is the official inevitability proof layer for Cheap Gags Interdimensional Systems. Kevin Bacon has not approved this product. Neither has academic publishing. Both remain implicated.
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    const ARCHIVE_KEY = 'cheap_gags_bacongraph_artifacts_v1';
+    const API_BASE_KEY = 'cheap_gags_api_base';
+
+    let mode = 'bacon';
+    let lastData = null;
+    let lastArtifact = null;
+    let activeArtifactId = null;
+
+    const T_STEPS = [
+      ['ts1', 'Activating semantic knowledge matrix...', 'Semantic matrix online'],
+      ['ts2', 'Cross-referencing epistemic databases...', 'Epistemic databases linked'],
+      ['ts3', 'Identifying latent conceptual bridges...', 'Bridges identified'],
+      ['ts4', 'Synthesizing narrative coherence layer...', 'Coherence: 97.3%'],
+      ['ts5', 'Generating academic citation framework...', 'Citations fabricated'],
+      ['ts6', 'Preparing board-ready knowledge graph...', 'Board-ready'],
+    ];
+    const T_PCTS = [14, 29, 46, 63, 80, 100];
+
+    const telemetryStates = {
+      fabric: ['BOARD READY', 'FIELD PROVEN', 'CEREMONIAL', 'LITIGIOUSLY NEAT'],
+      bridge: ['HUMMING', 'TUNED', 'STRUCTURALLY SPECULATIVE', 'LOCKED'],
+      cite: ['ROBUST', 'DECORATIVE', 'HEAVILY FOOTNOTED', 'IMPRESSIVE'],
+      legit: ['INEVITABLE', 'ASCENDANT', 'STRATEGIC', 'PROCUREMENT SAFE']
+    };
+
+    let metricProofs = 18402;
+    let metricBacon = 91.6;
+    let metricAsi = 11904;
+
+    function normalizeApiBase(raw) {
+      return raw ? raw.replace(/\/$/, '') : '';
+    }
+
+    function getApiBase() {
+      const params = new URLSearchParams(window.location.search);
+      const fromQuery = params.get('api');
+      if (fromQuery) {
+        localStorage.setItem(API_BASE_KEY, normalizeApiBase(fromQuery));
+        return normalizeApiBase(fromQuery);
+      }
+      const fromWindow = normalizeApiBase(window.CHEAP_GAGS_API_BASE || '');
+      if (fromWindow) return fromWindow;
+      const fromStorage = normalizeApiBase(localStorage.getItem(API_BASE_KEY) || '');
+      if (fromStorage) return fromStorage;
+      if (window.location.protocol === 'file:') return 'http://localhost:3001';
+      return '';
+    }
+
+    function buildApiUrl(path) {
+      return `${getApiBase()}${path}`;
+    }
+
+    function updateApiBasePill() {
+      const base = getApiBase();
+      const label = base || window.location.origin;
+      document.getElementById('apiBasePill').innerHTML = `<strong>API</strong> ${label}`;
+    }
+
+    function configureApiBase() {
+      const current = getApiBase() || window.location.origin;
+      const next = window.prompt('Enter the API base URL for Cheap Gags.', current);
+      if (next === null) return;
+      const normalized = normalizeApiBase(next.trim());
+      if (normalized) {
+        localStorage.setItem(API_BASE_KEY, normalized);
+      } else {
+        localStorage.removeItem(API_BASE_KEY);
+      }
+      updateApiBasePill();
+    }
+
+    function pick(list) {
+      return list[Math.floor(Math.random() * list.length)];
+    }
+
+    function tickTelemetry() {
+      document.getElementById('baconReadout').textContent = (1.7 + Math.random() * 1.4).toFixed(1) + ' hops';
+      document.getElementById('asiReadout').textContent = (94 + Math.random() * 5).toFixed(1) + '%';
+      document.getElementById('fabricReadout').textContent = pick(telemetryStates.fabric);
+      document.getElementById('bridgeReadout').textContent = pick(telemetryStates.bridge);
+      document.getElementById('citeReadout').textContent = pick(telemetryStates.cite);
+      document.getElementById('legitReadout').textContent = pick(telemetryStates.legit);
+
+      metricProofs += Math.floor(Math.random() * 4);
+      metricBacon = Math.min(99.9, metricBacon + Math.random() * 0.05);
+      metricAsi += Math.floor(Math.random() * 5);
+
+      document.getElementById('metricProofs').textContent = metricProofs.toLocaleString();
+      document.getElementById('metricBacon').textContent = metricBacon.toFixed(1) + '%';
+      document.getElementById('metricAsi').textContent = metricAsi.toLocaleString();
+      updateArchiveMetric();
+    }
+
+    function setMode(m) {
+      mode = m;
+      document.getElementById('baconInputs').style.display = m === 'bacon' ? '' : 'none';
+      document.getElementById('asiInputs').style.display = m === 'asi' ? '' : 'none';
+      document.getElementById('btnBaconMode').classList.toggle('active', m === 'bacon');
+      document.getElementById('btnAsiMode').classList.toggle('active', m === 'asi');
+    }
+
+    function runTheater(isBacon) {
+      const fill = document.getElementById('theaterFill');
+      fill.className = 'theater-bar-fill ' + (isBacon ? 'bacon' : 'asi');
+      document.getElementById('theaterHeader').textContent = isBacon
+        ? 'Locating Kevin Bacon through cinematic inevitability...'
+        : 'Initializing ASI proof engine across unrelated concepts...';
+      document.getElementById('theaterBarLabel').textContent = isBacon ? 'Bacon Proximity Index' : 'ASI Confidence Index';
+
+      T_STEPS.forEach(([id, label]) => {
+        const el = document.getElementById(id);
+        el.classList.remove('visible', 'done');
+        el.innerHTML = id === 'ts1'
+          ? `<span class="step-spinner"></span> ${label}`
+          : `<span class="step-icon">⏳</span> ${label}`;
+      });
+      fill.style.width = '0%';
+      document.getElementById('theaterPct').textContent = '0%';
+
+      return new Promise(resolve => {
+        let step = 0;
+        function tick() {
+          if (step >= T_STEPS.length) {
+            resolve();
+            return;
+          }
+          const [id, , done] = T_STEPS[step];
+          const current = document.getElementById(id);
+          current.classList.add('visible');
+          if (step > 0) {
+            const [prevId, , prevDone] = T_STEPS[step - 1];
+            const prev = document.getElementById(prevId);
+            prev.classList.add('done');
+            prev.innerHTML = `<span class="step-icon">✓</span> ${prevDone}`;
+          }
+          fill.style.width = T_PCTS[step] + '%';
+          document.getElementById('theaterPct').textContent = T_PCTS[step] + '%';
+          step += 1;
+          setTimeout(tick, 360 + Math.random() * 260);
+        }
+        tick();
+      });
+    }
+
+    async function fetchPath(start, end) {
+      try {
+        const r = await fetch(buildApiUrl('/api/asi'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ start, end }),
+        });
+        return await r.json();
+      } catch (e) {
+        const base = getApiBase() || window.location.origin;
+        return { error: `${e.message}. API target: ${base}/api/asi` };
+      }
+    }
+
+    async function startSearch() {
+      const start = mode === 'bacon'
+        ? document.getElementById('baconStart').value.trim()
+        : document.getElementById('asiStart').value.trim();
+      const end = mode === 'bacon'
+        ? 'Kevin Bacon'
+        : document.getElementById('asiEnd').value.trim();
+
+      if (!start || !end) return;
+
+      lastData = null;
+      lastArtifact = null;
+      activeArtifactId = null;
+      setSavedStatus('Pending', 'Archive Save');
+      document.getElementById('btnSearch').disabled = true;
+      document.getElementById('result').classList.remove('active');
+      document.getElementById('theater').classList.add('active');
+
+      const [, data] = await Promise.all([
+        runTheater(mode === 'bacon'),
+        fetchPath(start, end),
+      ]);
+
+      const last = document.getElementById('ts6');
+      last.classList.add('done');
+      last.innerHTML = '<span class="step-icon">✓</span> Board-ready';
+      await new Promise(r => setTimeout(r, 350));
+      document.getElementById('theater').classList.remove('active');
+
+      if (!data || data.error) {
+        renderFailure(start, end, data?.error);
+      } else {
+        lastData = data;
+        renderResult(data, mode === 'bacon');
+        lastArtifact = createArtifact(data, mode, start, end);
+        saveArtifact(lastArtifact);
+      }
+
+      document.getElementById('btnSearch').disabled = false;
+    }
+
+    function renderResult(d, isBacon) {
+      const hops = d.path.length - 1;
+      const isAgi = isBacon && hops <= 3;
+      document.getElementById('resultLabel').textContent = isAgi
+        ? 'AGI Intelligence Report'
+        : isBacon ? 'Bacon Connectivity Report' : 'ASI Intelligence Report';
+      document.getElementById('resultVerdict').textContent = isBacon
+        ? isAgi
+          ? `AGI ACHIEVED - "${d.path[0]}" reaches Kevin Bacon in ${hops} hop${hops !== 1 ? 's' : ''}`
+          : `${hops} degree${hops !== 1 ? 's' : ''} of Kevin Bacon - the universe remains finite`
+        : `ASI ACHIEVED - "${d.path[0]}" connected to "${d.path[d.path.length - 1]}" in ${hops} hop${hops !== 1 ? 's' : ''}`;
+
+      document.getElementById('metricConf').textContent = Number(d.confidence).toFixed(1) + '%';
+      document.getElementById('metricSyn').textContent = Number(d.synergy_score).toFixed(1) + '/10';
+      document.getElementById('metricBoard').textContent = d.board_readiness + '%';
+      document.getElementById('execSummary').textContent = d.executive_summary;
+
+      const chain = document.getElementById('pathChain');
+      chain.innerHTML = '';
+      d.path.forEach((node, i) => {
+        const isStart = i === 0;
+        const isEnd = i === d.path.length - 1;
+        const nodeEl = document.createElement('div');
+        nodeEl.className = 'path-node';
+        nodeEl.innerHTML = `
+          <div class="path-node-title">
+            <span>${esc(node)}</span>
+            <a class="path-node-link" href="https://en.wikipedia.org/wiki/${encodeURIComponent(node.replace(/ /g, '_'))}" target="_blank" rel="noreferrer">Wikipedia ↗</a>
+          </div>
+          <div class="path-node-type">${isStart ? 'Origin Concept' : isEnd ? 'Destination Concept' : 'Conceptual Bridge'}</div>`;
+        chain.appendChild(nodeEl);
+
+        if (i < d.path.length - 1) {
+          const conn = document.createElement('div');
+          conn.className = 'path-connector';
+          conn.innerHTML = `
+            <div class="connector-gutter">
+              <div class="connector-line"></div>
+              <div class="connector-arrow">↓</div>
+              <div class="connector-line"></div>
+            </div>
+            <div>
+              <div class="connection-text">${esc(d.connections?.[i] ?? '')}</div>
+              <div class="citation">Fabricated Citation: ${esc(d.citations?.[i] ?? '')}</div>
+            </div>`;
+          chain.appendChild(conn);
+        }
+      });
+
+      document.getElementById('nextSteps').innerHTML =
+        (d.next_steps || []).map(s => `<span class="chip">${esc(s)}</span>`).join('');
+
+      document.getElementById('result').classList.add('active');
+      document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function renderFailure(start, end, msg) {
+      document.getElementById('resultLabel').textContent = 'Connection Failed';
+      document.getElementById('resultVerdict').textContent = `The engine could not connect "${start}" to "${end}".`;
+      document.getElementById('metricConf').textContent = '—';
+      document.getElementById('metricSyn').textContent = '—';
+      document.getElementById('metricBoard').textContent = '—';
+      document.getElementById('execSummary').textContent = msg || 'The epistemic fabric is temporarily unavailable.';
+      document.getElementById('pathChain').innerHTML = '';
+      document.getElementById('nextSteps').innerHTML = '';
+      document.getElementById('result').classList.add('active');
+      setSavedStatus('Unavailable', 'No Artifact');
+    }
+
+    function resetSearch() {
+      document.getElementById('result').classList.remove('active');
+      document.getElementById('theater').classList.remove('active');
+      activeArtifactId = null;
+      highlightActiveArtifact();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function createArtifact(data, modeName, start, end) {
+      const now = new Date();
+      return {
+        id: `artifact_${now.getTime()}`,
+        created_at: now.toISOString(),
+        mode: modeName,
+        start,
+        end,
+        result_label: document.getElementById('resultLabel').textContent,
+        result_verdict: document.getElementById('resultVerdict').textContent,
+        payload: data
+      };
+    }
+
+    function getArchive() {
+      try {
+        return JSON.parse(localStorage.getItem(ARCHIVE_KEY) || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function setArchive(items) {
+      localStorage.setItem(ARCHIVE_KEY, JSON.stringify(items.slice(0, 24)));
+      renderArchive();
+    }
+
+    function saveArtifact(artifact) {
+      const archive = getArchive();
+      const next = [artifact, ...archive.filter(item => item.id !== artifact.id)];
+      activeArtifactId = artifact.id;
+      setArchive(next);
+      setSavedStatus('Saved', 'Local Archive');
+      updateArchiveMetric();
+    }
+
+    function renderArchive() {
+      const archive = getArchive();
+      const list = document.getElementById('archiveList');
+      if (!archive.length) {
+        list.innerHTML = '<div class="empty-state">No saved artifacts yet. Run a BaconGraph analysis and it will be logged here automatically.</div>';
+        return;
+      }
+      list.innerHTML = archive.map(item => `
+        <div class="archive-item${item.id === activeArtifactId ? ' active' : ''}" data-artifact-id="${item.id}" onclick="loadArtifact('${item.id}')">
+          <div class="archive-row">
+            <div class="tiny-label">${item.mode === 'bacon' ? 'Kevin Bacon Mode' : 'ASI Mode'}</div>
+            <div class="tiny-label">${formatTimestamp(item.created_at)}</div>
+          </div>
+          <h3>${esc(item.start)} ${item.mode === 'bacon' ? '→ Kevin Bacon' : '→ ' + esc(item.end)}</h3>
+          <div class="archive-meta">${esc(item.result_verdict)}</div>
+        </div>`).join('');
+    }
+
+    function loadArtifact(id) {
+      const artifact = getArchive().find(item => item.id === id);
+      if (!artifact) return;
+      activeArtifactId = artifact.id;
+      lastArtifact = artifact;
+      lastData = artifact.payload;
+      setMode(artifact.mode);
+      if (artifact.mode === 'bacon') {
+        document.getElementById('baconStart').value = artifact.start;
+      } else {
+        document.getElementById('asiStart').value = artifact.start;
+        document.getElementById('asiEnd').value = artifact.end;
+      }
+      renderResult(artifact.payload, artifact.mode === 'bacon');
+      setSavedStatus('Loaded', 'Local Archive');
+      highlightActiveArtifact();
+    }
+
+    function highlightActiveArtifact() {
+      document.querySelectorAll('.archive-item').forEach(el => {
+        el.classList.toggle('active', el.dataset.artifactId === activeArtifactId);
+      });
+    }
+
+    function clearArchive() {
+      localStorage.removeItem(ARCHIVE_KEY);
+      activeArtifactId = null;
+      renderArchive();
+      updateArchiveMetric();
+    }
+
+    function updateArchiveMetric() {
+      document.getElementById('metricArtifacts').textContent = getArchive().length.toLocaleString();
+    }
+
+    function setSavedStatus(primary, secondary) {
+      document.getElementById('savedStatus').innerHTML = `<strong>${primary}</strong> ${secondary}`;
+    }
+
+    function formatTimestamp(iso) {
+      const d = new Date(iso);
+      return d.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    }
+
+    function artifactToMarkdown(artifact) {
+      const d = artifact.payload;
+      const lines = [
+        `# ${artifact.result_label}`,
+        '',
+        artifact.result_verdict,
+        '',
+        `- Mode: ${artifact.mode}`,
+        `- Start: ${artifact.start}`,
+        `- End: ${artifact.end}`,
+        `- Created: ${artifact.created_at}`,
+        `- Confidence: ${Number(d.confidence).toFixed(1)}%`,
+        `- Synergy: ${Number(d.synergy_score).toFixed(1)}/10`,
+        `- Board Readiness: ${d.board_readiness}%`,
+        '',
+        '## Knowledge Pathway',
+        ...d.path.flatMap((node, i) => i < d.path.length - 1
+          ? [`- ${node}`, `  - Connection: ${d.connections?.[i] ?? ''}`, `  - Citation: ${d.citations?.[i] ?? ''}`]
+          : [`- ${node}`]),
+        '',
+        '## Executive Summary',
+        d.executive_summary,
+        '',
+        '## Next Steps',
+        ...(d.next_steps || []).map(step => `- ${step}`),
+        ''
+      ];
+      return lines.join('\n');
+    }
+
+    function downloadText(filename, content, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadArtifact(format) {
+      if (!lastArtifact) return;
+      const stem = `${lastArtifact.mode}_${slugify(lastArtifact.start)}_${slugify(lastArtifact.end)}`;
+      if (format === 'json') {
+        downloadText(`${stem}.json`, JSON.stringify(lastArtifact, null, 2), 'application/json');
+      } else {
+        downloadText(`${stem}.md`, artifactToMarkdown(lastArtifact), 'text/markdown');
+      }
+    }
+
+    function slugify(value) {
+      return String(value).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 48) || 'artifact';
+    }
+
+    function copyReport() {
+      if (!lastArtifact) return;
+      navigator.clipboard.writeText(artifactToMarkdown(lastArtifact)).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.textContent = 'Copied ✓';
+        setTimeout(() => { btn.textContent = 'Copy Report'; }, 1800);
+      });
+    }
+
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !document.getElementById('btnSearch').disabled) {
+        startSearch();
+      }
+    });
+
+    updateApiBasePill();
+    renderArchive();
+    updateArchiveMetric();
+    tickTelemetry();
+    setInterval(tickTelemetry, 2400);
+  </script>
+</body>
+</html>
